@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Manifest Include="..\app.manifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\glUtil.cpp" />
+    <ClCompile Include="..\src\Audio.cpp" />
+    <ClCompile Include="..\src\PopSS.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\glUtil.h" />
+    <ClInclude Include="..\src\Audio.h" />
+    <ClInclude Include="..\src\util\Random.hpp">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\PopSS.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Util">
+      <UniqueIdentifier>{7dac5950-3bb7-4b53-9b50-ac17c3c06750}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

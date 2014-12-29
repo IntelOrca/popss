@@ -1,0 +1,21 @@
+obj/
+build/
+lib/
+*.suo
+
+# Visual C++ cache files
+ipch/
+*.aps
+*.ncb
+*.opensdf
+*.sdf
+*.cachefile
+
+# Visual Studio profiler
+*.psess
+*.vsp
+*.vspx
+
+#cmake generated project files
+macMake/
+macXcode/

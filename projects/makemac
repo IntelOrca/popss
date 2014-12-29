@@ -1,0 +1,6 @@
+#/bin/sh
+rm -rf macMake
+mkdir macMake
+cd macMake
+cmake ..
+make

@@ -1,0 +1,6 @@
+#/bin/sh
+rm -rf macXcode
+mkdir macXcode
+cd macXcode
+cmake -G Xcode ..
+open popss.xcodeproj
