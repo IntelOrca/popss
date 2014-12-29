@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<landscape>
+  <light>
+    <position>0.0 2048.0 0.0</position>
+    <ambient>0.05</ambient>
+    <diffuse>0.4</diffuse>
+    <specular>0.0</specular>
+  </light>
+  <sun>
+    <position>-1.0 0.1 1.0</position>
+    <ambient>0.0</ambient>
+    <diffuse>0.5 0.5 0.0</diffuse>
+    <specular>0.25 0.25 0.0</specular>
+  </sun>
+  <sky>
+    <colour>0.5 0.5 1.0</colour>
+  </sky>
+  <terrains>
+    <terrain>
+      <name>cliff</name>
+      <texture>3</texture>
+      <minsteepness>256</minsteepness>
+    </terrain>
+    <terrain>
+      <name>sand</name>
+      <texture>0</texture>
+      <maxheight>128</maxheight>
+      <maxdistancefromwater>3</maxdistancefromwater>
+    </terrain>
+    <terrain>
+      <name>low grass</name>
+      <texture>0</texture>
+      <maxheight>256</maxheight>
+      <diffuse>0.75</diffuse>
+    </terrain>
+    <terrain>
+      <name>dirt</name>
+      <texture>4</texture>
+      <maxheight>512</maxheight>
+    </terrain>
+    <terrain>
+      <name>high grass</name>
+      <texture>1</texture>
+      <maxheight>768</maxheight>
+    </terrain>
+    <terrain>
+      <name>snow</name>
+      <texture>2</texture>
+    </terrain>
+  </terrains>
+</landscape>

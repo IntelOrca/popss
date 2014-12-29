@@ -20,21 +20,67 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\Audio.cpp" />
+    <ClCompile Include="..\src\Camera.cpp" />
+    <ClCompile Include="..\src\GameView.cpp" />
+    <ClCompile Include="..\src\LandscapeRenderer.cpp" />
     <ClCompile Include="..\src\PopSS.cpp" />
     <ClCompile Include="..\src\glUtil.cpp" />
+    <ClCompile Include="..\src\TerrainStyle.cpp" />
+    <ClCompile Include="..\src\World.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Audio.h" />
+    <ClInclude Include="..\src\Camera.h" />
+    <ClInclude Include="..\src\GameView.h" />
+    <ClInclude Include="..\src\LandscapeRenderer.h" />
     <ClInclude Include="..\src\PopSS.h" />
     <ClInclude Include="..\src\glUtil.h" />
+    <ClInclude Include="..\src\TerrainStyle.h" />
+    <ClInclude Include="..\src\util\MathExtensions.hpp" />
     <ClInclude Include="..\src\util\Random.hpp" />
+    <ClInclude Include="..\src\World.h" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="..\app.manifest" />
   </ItemGroup>
+  <ItemGroup>
+    <Xml Include="..\data\maps\landscape.dark.xml" />
+    <Xml Include="..\data\maps\landscape.light.xml" />
+    <Xml Include="..\data\maps\landscape.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\data\maps\levl2011.dat" />
+    <None Include="..\data\shaders\flat_object.frag" />
+    <None Include="..\data\shaders\flat_object.vert" />
+    <None Include="..\data\shaders\land.frag" />
+    <None Include="..\data\shaders\land.vert" />
+    <None Include="..\data\shaders\landscape.glsl" />
+    <None Include="..\data\shaders\lighting.glsl" />
+    <None Include="..\data\shaders\object.frag" />
+    <None Include="..\data\shaders\object.vert" />
+    <None Include="..\data\shaders\sky.frag" />
+    <None Include="..\data\shaders\sky.vert" />
+    <None Include="..\data\shaders\water.frag" />
+    <None Include="..\data\shaders\water.geom" />
+    <None Include="..\data\shaders\water.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\data\textures\blade.png" />
+    <Image Include="..\data\textures\cliff.jpg" />
+    <Image Include="..\data\textures\dirt.jpg" />
+    <Image Include="..\data\textures\grass.jpg" />
+    <Image Include="..\data\textures\sand.jpg" />
+    <Image Include="..\data\textures\snow.jpg" />
+    <Image Include="..\data\textures\water.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\data\objects\vok.obj">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{56552A04-B9C1-4CD5-BC7D-F0B9B06249F3}</ProjectGuid>
-    <RootNamespace>Bot</RootNamespace>
+    <RootNamespace>popss</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -114,6 +160,9 @@
       <AdditionalDependencies>sdl2.lib;sdl2main.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /Y /E "$(ProjectDir)\..\data\*.*" "$(TargetDir)\data\"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -126,6 +175,9 @@
       <AdditionalDependencies>sdl2.lib;sdl2main.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /Y /E "$(ProjectDir)\..\data\*.*" "$(TargetDir)\data\"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -144,6 +196,9 @@
       <SubSystem>Console</SubSystem>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /Y /E "$(ProjectDir)\..\data\*.*" "$(TargetDir)\data\"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -165,6 +220,9 @@
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /Y /E "$(ProjectDir)\..\data\*.*" "$(TargetDir)\data\"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

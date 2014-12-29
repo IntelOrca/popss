@@ -1,5 +1,6 @@
 #pragma once
 
+#define _CRT_SECURE_NO_WARNINGS
 #define _USE_MATH_DEFINES
 #include <cmath>
 
@@ -74,3 +75,6 @@ typedef trect<int> recti;
 
 extern SDL_Window *glWindow;
 extern SDL_GLContext gglContext;
+
+extern bool gIsScanKeyDown[];
+extern bool gIsKeyDown[];

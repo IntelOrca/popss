@@ -1,14 +1,20 @@
 #include "Audio.h"
 #include "PopSS.h"
+#include "GameView.h"
 #include "glUtil.h"
 
 SDL_Window *glWindow;
 SDL_GLContext gglContext;
+bool gIsScanKeyDown[256] = { 0 };
+bool gIsKeyDown[256] = { 0 };
+
 static bool _quit = false;
 
 static bool _updateStepMode = false;
 static bool _updateStepModeCanStep = false;
 static int _updateStep = 1;
+
+static IntelOrca::PopSS::GameView *_gameView;
 
 bool init_sdl()
 {
@@ -72,6 +78,10 @@ void handle_events()
 					_updateStep = 8;
 					break;
 				}
+				if (event.key.keysym.scancode < countof(gIsScanKeyDown))
+					gIsScanKeyDown[event.key.keysym.scancode] = true;
+				if (event.key.keysym.sym < countof(gIsKeyDown))
+					gIsKeyDown[event.key.keysym.sym] = true;
 				break;
 			case SDL_KEYUP:
 				switch (event.key.keysym.sym) {
@@ -79,6 +89,10 @@ void handle_events()
 					_updateStep = 1;
 					break;
 				}
+				if (event.key.keysym.scancode < countof(gIsScanKeyDown))
+					gIsScanKeyDown[event.key.keysym.scancode] = false;
+				if (event.key.keysym.sym < countof(gIsKeyDown))
+					gIsKeyDown[event.key.keysym.sym] = false;
 				break;
 			case SDL_WINDOWEVENT:
 				if (event.window.event == SDL_WINDOWEVENT_RESIZED)
@@ -101,17 +115,15 @@ void handle_events()
 
 void update()
 {
+	_gameView->Update();
 }
 
 void draw()
 {
-	// glClearColor((rand() % 256) / 256.0f, (rand() % 256) / 256.0f, (rand() % 256) / 256.0f, 1.0f);
 	glClearColor(0, 0, 0, 1);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	glDisable(GL_DEPTH_TEST);
-
-	projectFlat(1920, 1080);
+	_gameView->Draw();
 
 	SDL_GL_SwapWindow(glWindow);
 }
@@ -122,6 +134,8 @@ int main(int argc, char** argv)
 
 	srand(time(NULL));
 	init_sdl();
+
+	_gameView = new IntelOrca::PopSS::GameView();
 
 	while (!_quit) {
 		handle_events();

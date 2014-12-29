@@ -7,6 +7,11 @@
     <ClCompile Include="..\src\glUtil.cpp" />
     <ClCompile Include="..\src\Audio.cpp" />
     <ClCompile Include="..\src\PopSS.cpp" />
+    <ClCompile Include="..\src\LandscapeRenderer.cpp" />
+    <ClCompile Include="..\src\World.cpp" />
+    <ClCompile Include="..\src\TerrainStyle.cpp" />
+    <ClCompile Include="..\src\Camera.cpp" />
+    <ClCompile Include="..\src\GameView.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\glUtil.h" />
@@ -15,10 +20,114 @@
       <Filter>Util</Filter>
     </ClInclude>
     <ClInclude Include="..\src\PopSS.h" />
+    <ClInclude Include="..\src\LandscapeRenderer.h" />
+    <ClInclude Include="..\src\Camera.h" />
+    <ClInclude Include="..\src\World.h" />
+    <ClInclude Include="..\src\TerrainStyle.h" />
+    <ClInclude Include="..\src\util\MathExtensions.hpp">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\GameView.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Util">
       <UniqueIdentifier>{7dac5950-3bb7-4b53-9b50-ac17c3c06750}</UniqueIdentifier>
     </Filter>
+    <Filter Include="data">
+      <UniqueIdentifier>{660c29f5-2bec-4169-99ec-86ac89443de2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="data\maps">
+      <UniqueIdentifier>{8b400f4e-4445-4a94-a002-641ef390d781}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="data\objects">
+      <UniqueIdentifier>{825b8fb5-a2ad-40a7-8a10-f44206a0dc3a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="data\shaders">
+      <UniqueIdentifier>{55c80a45-186c-4248-94d7-321a43fb685f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="data\textures">
+      <UniqueIdentifier>{305eab41-41d9-4490-91f5-17cbc859d534}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="..\data\maps\landscape.dark.xml">
+      <Filter>data\maps</Filter>
+    </Xml>
+    <Xml Include="..\data\maps\landscape.light.xml">
+      <Filter>data\maps</Filter>
+    </Xml>
+    <Xml Include="..\data\maps\landscape.xml">
+      <Filter>data\maps</Filter>
+    </Xml>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\data\maps\levl2011.dat">
+      <Filter>data\maps</Filter>
+    </None>
+    <None Include="..\data\shaders\flat_object.frag">
+      <Filter>data\shaders</Filter>
+    </None>
+    <None Include="..\data\shaders\flat_object.vert">
+      <Filter>data\shaders</Filter>
+    </None>
+    <None Include="..\data\shaders\land.frag">
+      <Filter>data\shaders</Filter>
+    </None>
+    <None Include="..\data\shaders\land.vert">
+      <Filter>data\shaders</Filter>
+    </None>
+    <None Include="..\data\shaders\landscape.glsl">
+      <Filter>data\shaders</Filter>
+    </None>
+    <None Include="..\data\shaders\lighting.glsl">
+      <Filter>data\shaders</Filter>
+    </None>
+    <None Include="..\data\shaders\object.frag">
+      <Filter>data\shaders</Filter>
+    </None>
+    <None Include="..\data\shaders\object.vert">
+      <Filter>data\shaders</Filter>
+    </None>
+    <None Include="..\data\shaders\sky.frag">
+      <Filter>data\shaders</Filter>
+    </None>
+    <None Include="..\data\shaders\sky.vert">
+      <Filter>data\shaders</Filter>
+    </None>
+    <None Include="..\data\shaders\water.frag">
+      <Filter>data\shaders</Filter>
+    </None>
+    <None Include="..\data\shaders\water.geom">
+      <Filter>data\shaders</Filter>
+    </None>
+    <None Include="..\data\shaders\water.vert">
+      <Filter>data\shaders</Filter>
+    </None>
+    <None Include="..\data\objects\vok.obj">
+      <Filter>data\objects</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\data\textures\blade.png">
+      <Filter>data\textures</Filter>
+    </Image>
+    <Image Include="..\data\textures\cliff.jpg">
+      <Filter>data\textures</Filter>
+    </Image>
+    <Image Include="..\data\textures\dirt.jpg">
+      <Filter>data\textures</Filter>
+    </Image>
+    <Image Include="..\data\textures\grass.jpg">
+      <Filter>data\textures</Filter>
+    </Image>
+    <Image Include="..\data\textures\sand.jpg">
+      <Filter>data\textures</Filter>
+    </Image>
+    <Image Include="..\data\textures\snow.jpg">
+      <Filter>data\textures</Filter>
+    </Image>
+    <Image Include="..\data\textures\water.jpg">
+      <Filter>data\textures</Filter>
+    </Image>
   </ItemGroup>
 </Project>
