@@ -1,6 +1,5 @@
 #pragma once
 
-#define _CRT_SECURE_NO_WARNINGS
 #define _USE_MATH_DEFINES
 #include <cmath>
 
@@ -21,20 +20,12 @@
 	#define NOMINMAX
 	#define WIN32_LEAN_AND_MEAN
 	#include <windows.h>
-	#include <gl/gl.h>
-	#include <gl/glext.h>
-#elif __APPLE__
-	#include <OpenGL/gl.h>
-	#include <OpenGL/glext.h>
-#else
-	#include <GL/gl.h>
 #endif
 
+#include <GL/glew.h>
 #include <SDL.h>
 
 #include <glm/glm.hpp>
-
-#include "glUtil.h"
 
 #define abstract
 #define interface struct

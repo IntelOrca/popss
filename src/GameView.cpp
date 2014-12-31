@@ -17,6 +17,10 @@ GameView::~GameView()
 
 void GameView::Update()
 {
+	if (updateCounter == 0) {
+		this->landscapeRenderer.Initialise();
+	}
+
 	// Input
 	if (gIsScanKeyDown[SDL_SCANCODE_UP])
 		this->camera.MoveForwards();
@@ -26,6 +30,8 @@ void GameView::Update()
 		this->camera.RotateLeft();
 	if (gIsScanKeyDown[SDL_SCANCODE_RIGHT])
 		this->camera.RotateRight();
+
+	updateCounter++;
 }
 
 void GameView::Draw()

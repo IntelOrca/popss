@@ -4,7 +4,6 @@
     <Manifest Include="..\app.manifest" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\glUtil.cpp" />
     <ClCompile Include="..\src\Audio.cpp" />
     <ClCompile Include="..\src\PopSS.cpp" />
     <ClCompile Include="..\src\LandscapeRenderer.cpp" />
@@ -12,9 +11,13 @@
     <ClCompile Include="..\src\TerrainStyle.cpp" />
     <ClCompile Include="..\src\Camera.cpp" />
     <ClCompile Include="..\src\GameView.cpp" />
+    <ClCompile Include="..\src\OrcaShader.cpp" />
+    <ClCompile Include="..\lib\lodepng\lodepng.cpp">
+      <Filter>Libraries</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\VertexBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\glUtil.h" />
     <ClInclude Include="..\src\Audio.h" />
     <ClInclude Include="..\src\util\Random.hpp">
       <Filter>Util</Filter>
@@ -28,6 +31,9 @@
       <Filter>Util</Filter>
     </ClInclude>
     <ClInclude Include="..\src\GameView.h" />
+    <ClInclude Include="..\src\OrcaShader.h" />
+    <ClInclude Include="..\src\VertexBuffer.h" />
+    <ClInclude Include="..\src\LightSource.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Util">
@@ -47,6 +53,9 @@
     </Filter>
     <Filter Include="data\textures">
       <UniqueIdentifier>{305eab41-41d9-4490-91f5-17cbc859d534}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libraries">
+      <UniqueIdentifier>{79a4d24e-1f20-4a47-9b5d-ad91320373d6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

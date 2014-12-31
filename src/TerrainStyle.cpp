@@ -11,6 +11,8 @@ TerrainStyle::TerrainStyle()
 	this->minDistanceFromWater = 0;
 	this->maxDistanceFromWater = INT32_MAX;
 
+	this->textureIndex = 0;
+
 	this->ambientReflectivity = 1.0f;
 	this->diffuseReflectivity = 1.0f;
 	this->specularReflectivity = 1.0f;

@@ -11,6 +11,27 @@ World::World()
 {
 	this->tiles = NULL;
 	this->distanceFromWaterMap = NULL;
+
+	this->numTerrainStyles = 6;
+	this->terrainStyles = new TerrainStyle[this->numTerrainStyles];
+	this->terrainStyles[0].textureIndex = 3;
+	this->terrainStyles[0].minSteepness = 256;
+	
+	this->terrainStyles[1].textureIndex = 0;
+	this->terrainStyles[1].maxHeight = 256;
+	this->terrainStyles[1].maxDistanceFromWater = 3;
+
+	this->terrainStyles[2].textureIndex = 1;
+	this->terrainStyles[2].maxHeight = 256;
+	this->terrainStyles[2].diffuseReflectivity = 0.75f;
+
+	this->terrainStyles[3].textureIndex = 4;
+	this->terrainStyles[3].maxHeight = 512;
+
+	this->terrainStyles[4].textureIndex = 1;
+	this->terrainStyles[4].maxHeight = 768;
+
+	this->terrainStyles[5].textureIndex = 2;
 }
 
 World::~World()
@@ -59,16 +80,13 @@ int *World::GenerateDistanceFromWaterMap() const
 		for (int x = 0; x < this->size; x++) {
 			if (this->tiles[x + (z * this->size)].height == 0) {
 				numTilesSet++;
-				distanceMap[x, z] = 0;
+				distanceMap[x + (z * this->size)] = 0;
 				tileQueue.push({ x, z, 0 });
 			} else {
-				// distanceMap[x, z] = -1;
-
-				distanceMap[x, z] = 0;
+				distanceMap[x + (z * this->size)] = -1;
 			}
 		}
 	}
-	return distanceMap;
 
 	while (tileQueue.size() > 0 && numTilesSet < totalNumTiles) {
 		xzdist tile = tileQueue.front();
@@ -79,7 +97,7 @@ int *World::GenerateDistanceFromWaterMap() const
 				int xx = MapWrap(tile.x + x);
 				int zz = MapWrap(tile.z + z);
 
-				if (distanceMap[xx, zz] != -1)
+				if (distanceMap[xx + (zz * this->size)] != -1)
 					continue;
 				numTilesSet++;
 				distanceMap[xx + (zz * this->size)] = tile.distance + 1;
@@ -140,7 +158,7 @@ float World::CalculateMidAngle(float leftHeight, float midHeight, float rightHei
 
 int World::GetSteepness(int landX, int landZ) const
 {
-	unsigned int minHeight = INT32_MAX, maxHeight = INT32_MIN;
+	unsigned int minHeight = UINT32_MAX, maxHeight = 0;
 	for (int z = -1; z <= 1; z++) {
 		for (int x = -1; x <= 1; x++) {
 			minHeight = min(minHeight, this->GetTile(landX + x, landZ + z)->height);

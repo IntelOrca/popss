@@ -1,16 +1,39 @@
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
 #include "Camera.h"
 #include "LandscapeRenderer.h"
+#include "LightSource.h"
+#include "OrcaShader.h"
 #include "TerrainStyle.h"
 #include "Util/MathExtensions.hpp"
+#include "VertexBuffer.h"
 #include "World.h"
+
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <lodepng/lodepng.h>
 
 using namespace IntelOrca::PopSS;
 
 const float LandscapeRenderer::SphereRatio = 0.00002f;
 const float LandscapeRenderer::TextureMapSize = 1.0f / 4.0f;
+
+bool LoadTexture(GLuint texture, const char *path)
+{
+	GLubyte* bits;
+	unsigned int error, width, height;
+
+	error = lodepng_decode_file(&bits, &width, &height, path, LCT_RGBA, 8);
+	if (error != 0) {
+		fprintf(stderr, "Unable to read %s, %s.", path, lodepng_error_text(error));
+		return false;
+	}
+	
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, bits);
+	// glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	return true;
+}
 
 LandscapeRenderer::LandscapeRenderer()
 {
@@ -23,6 +46,23 @@ LandscapeRenderer::~LandscapeRenderer()
 
 }
 
+void LandscapeRenderer::Initialise()
+{
+	int landVectorCounts[] = { 3, 3, 2, 1, 4, 0 };
+	this->landVertexBuffer = new VertexBuffer(landVectorCounts);
+
+	this->landShader = OrcaShader::FromPath("land.vert", "land.frag");
+
+	memset(this->terrainTextures, 0, sizeof(this->terrainTextures));
+	glGenTextures(5, this->terrainTextures);
+	
+	LoadTexture(this->terrainTextures[0], "data/textures/sand.png");
+	LoadTexture(this->terrainTextures[1], "data/textures/grass.png");
+	LoadTexture(this->terrainTextures[2], "data/textures/snow.png");
+	LoadTexture(this->terrainTextures[3], "data/textures/cliff.png");
+	LoadTexture(this->terrainTextures[4], "data/textures/dirt.png");
+}
+
 void LandscapeRenderer::Render(const Camera *camera)
 {
 	// Get the camera view matrix
@@ -31,16 +71,16 @@ void LandscapeRenderer::Render(const Camera *camera)
 
 	glClear(GL_DEPTH_BUFFER_BIT);
 
-	glBlendFunc(GL_BLEND_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glEnable(GL_BLEND);
+	// glBlendFunc(GL_BLEND_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	// glEnable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
 	// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-	glMatrixMode(GL_PROJECTION);
-	glLoadMatrixf(glm::value_ptr(this->projectionMatrix));
+	// glMatrixMode(GL_PROJECTION);
+	// glLoadMatrixf(glm::value_ptr(this->projectionMatrix));
 
-	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf(glm::value_ptr(this->modelViewMatrix));
+	// glMatrixMode(GL_MODELVIEW);
+	// glLoadMatrixf(glm::value_ptr(this->modelViewMatrix));
 
 	this->RenderLand(camera);
 
@@ -54,7 +94,7 @@ void LandscapeRenderer::Render(const Camera *camera)
 void LandscapeRenderer::RenderArea(const Camera *camera, int viewSize, bool water)
 {
 	// Begin generating the vertices
-	glBegin(GL_TRIANGLES);
+	this->landVertexBuffer->Begin();
 
 	float translateX, translateZ;
 	int landOriginX, landOriginZ;
@@ -83,27 +123,56 @@ void LandscapeRenderer::RenderArea(const Camera *camera, int viewSize, bool wate
 	}
 
 	// Finish generation and render primitives
-	glEnd();
+	this->landVertexBuffer->End();
+	this->landVertexBuffer->Draw(GL_TRIANGLES);
 }
 
 
 void LandscapeRenderer::RenderLand(const Camera *camera)
 {
 	// Bind terrain textures
-	// for (int i = 0; i < _terrainTextures.Length; i++)
-	//	_terrainTextures[i].Bind(i);
+	for (int i = 0; i < 8; i++) {
+		if (this->terrainTextures[i] != 0) {
+			glBindTexture(GL_TEXTURE_2D, i);
+			glActiveTexture(GL_TEXTURE0 + i);
+		}
+	}
 
 	// Activate the land shader and set inputs
-	// _landShaderProgram.Activate();
-	// _landShaderProgram.SetUniform("ModelViewMatrix", _modelViewMatrix);
-	// _landShaderProgram.SetUniform("ProjectionMatrix", _projectionMatrix);
+	this->landShader->Use();
 
-	// _landShaderProgram.SetUniform("InputSphereRatio", SphereRatio);
+	glUniformMatrix4fv(glGetUniformLocation(this->landShader->program, "ProjectionMatrix"), 1, GL_FALSE, glm::value_ptr(this->projectionMatrix));
+	glUniformMatrix4fv(glGetUniformLocation(this->landShader->program, "ModelViewMatrix"), 1, GL_FALSE, glm::value_ptr(this->modelViewMatrix));
+	glUniform1f(glGetUniformLocation(this->landShader->program, "InputSphereRatio"), SphereRatio);
 
-	// RendererUtil.SetLightSources(_landShaderProgram, "InputLightSources", _world.LightSourceManager);
+	LightSource alight, *light = &alight;
 
-	// for (int i = 0; i < 8; i++)
-	//	_landShaderProgram.SetUniform("InputTexture[" + i + "]", i);
+	light->position = glm::vec3(0.0f, 2048.0f, 0.0f);
+	light->ambient = glm::vec4(0.05f);
+	light->diffuse = glm::vec4(0.4f);
+	light->specular = glm::vec4(0.0f);
+
+	glUniform1i(glGetUniformLocation(this->landShader->program, "InputLightSourcesCount"), 2);
+	glUniform3fv(glGetUniformLocation(this->landShader->program, "InputLightSources[0].Position"), 1, glm::value_ptr(light->position));
+	glUniform3fv(glGetUniformLocation(this->landShader->program, "InputLightSources[0].Ambient"), 1, glm::value_ptr(light->ambient));
+	glUniform3fv(glGetUniformLocation(this->landShader->program, "InputLightSources[0].Diffuse"), 1, glm::value_ptr(light->diffuse));
+	glUniform3fv(glGetUniformLocation(this->landShader->program, "InputLightSources[0].Specular"), 1, glm::value_ptr(light->specular));
+
+	light->position = glm::vec3(-1.0f, 0.1f, 1.0f) * World::SkyDomeRadius;
+	light->ambient = glm::vec4(0.0f);
+	light->diffuse = glm::vec4(0.5f, 0.5f, 0.0f, 0.0f);
+	light->specular = glm::vec4(0.25f, 0.25f, 0.0f, 0.0f);
+
+	glUniform3fv(glGetUniformLocation(this->landShader->program, "InputLightSources[1].Position"), 1, glm::value_ptr(light->position));
+	glUniform3fv(glGetUniformLocation(this->landShader->program, "InputLightSources[1].Ambient"), 1, glm::value_ptr(light->ambient));
+	glUniform3fv(glGetUniformLocation(this->landShader->program, "InputLightSources[1].Diffuse"), 1, glm::value_ptr(light->diffuse));
+	glUniform3fv(glGetUniformLocation(this->landShader->program, "InputLightSources[1].Specular"), 1, glm::value_ptr(light->specular));
+
+	char name[32];
+	for (int i = 0; i < 8; i++) {
+		sprintf(name, "InputTexture[%d]", i);
+		glUniform1i(glGetUniformLocation(this->landShader->program, name), i);
+	}
 
 	RenderArea(camera, this->landViewSize, false);
 }
@@ -186,8 +255,7 @@ void LandscapeRenderer::AddVertex(glm::vec3 position, glm::vec2 uv, const WorldT
 		position,
 		tile->lightNormal,
 		uv,
-		tile->height,
-		// terrainStyle->textureIndex,
+		terrainStyle->textureIndex,
 		glm::vec4(
 			terrainStyle->ambientReflectivity,
 			terrainStyle->diffuseReflectivity,
@@ -197,15 +265,15 @@ void LandscapeRenderer::AddVertex(glm::vec3 position, glm::vec2 uv, const WorldT
 	);
 }
 
-void LandscapeRenderer::AddVertex(glm::vec3 position, glm::vec3 normal, glm::vec2 uv, int texture, glm::vec4 material)
+void LandscapeRenderer::AddVertex(glm::vec3 position, glm::vec3 normal, glm::vec2 uv, int texture, const glm::vec4 &material)
 {
-	glm::vec4 colour = GetColourFromLand(texture);
+	// glm::vec4 colour = GetColourFromLand(texture);
 
-	glColor3f(colour.a, colour.g, colour.b);
-	glVertex3f(position.x, position.y, position.z);
-	glNormal3f(normal.x, normal.y, normal.z);
-	glTexCoord2f(uv.s, uv.t);
-	// _vertexBuffer.AddValues(position, normal, uv, (float)texture, material);
+	this->landVertexBuffer->AddValue(0, position);
+	this->landVertexBuffer->AddValue(1, normal);
+	this->landVertexBuffer->AddValue(2, uv);
+	this->landVertexBuffer->AddValue(3, texture);
+	this->landVertexBuffer->AddValue(4, material);
 }
 
 glm::vec2 LandscapeRenderer::GetTextureUV(int landX, int landZ)

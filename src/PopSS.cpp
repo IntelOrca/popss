@@ -1,7 +1,6 @@
 #include "Audio.h"
 #include "PopSS.h"
 #include "GameView.h"
-#include "glUtil.h"
 
 SDL_Window *glWindow;
 SDL_GLContext gglContext;
@@ -21,6 +20,10 @@ bool init_sdl()
 	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 8);
+
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+
 	glWindow = SDL_CreateWindow("PopSS", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1920, 1080, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 
 	if (glWindow == NULL) {
@@ -30,13 +33,17 @@ bool init_sdl()
 
 	gglContext = SDL_GL_CreateContext(glWindow);
 
-	printf("%s\n", glGetString(GL_VENDOR));
+	glewExperimental = GL_TRUE;
+	GLenum glewResult = glewInit();
+	if (glewResult != GLEW_OK) {
+		fprintf(stderr, "Failed to load OpenGL, %s.", glewGetErrorString(glewResult));
+		return false;
+	}
 
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
-	glShadeModel(GL_SMOOTH);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+	GLint major, minor;
+	glGetIntegerv(GL_MAJOR_VERSION, &major);
+	glGetIntegerv(GL_MINOR_VERSION, &minor);
+	printf("%s\n", glGetString(GL_VENDOR));
 
 	glClearColor(100 / 255.0, 149 / 255.0, 237 / 255.0, 1);
 	glViewport(0, 0, 1920, 1080);
@@ -53,10 +60,6 @@ void exit_sdl()
 void resize(int width, int height)
 {
 	glViewport(0, 0, width, height);
-
-	GLdouble ratio = (double)height / width;
-	glLoadIdentity();
-	glFrustum(-1, 1, -ratio, ratio, 1, 500);
 }
 
 void handle_events()
@@ -133,7 +136,8 @@ int main(int argc, char** argv)
 	long lastTicks = 0, ticks;
 
 	srand(time(NULL));
-	init_sdl();
+	if (!init_sdl())
+		return -1;
 
 	_gameView = new IntelOrca::PopSS::GameView();
 
