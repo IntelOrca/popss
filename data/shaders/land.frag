@@ -21,7 +21,7 @@ void main()
 	}
 
 	// Apply texture
-    vec4 colour = vec4(multiTexel, 1.0);
+	vec4 colour = vec4(multiTexel, 1.0);
 
 	// Apply fog
 	vec4 fogColour = vec4(0.5, 0.5, 0.5, 1.0);

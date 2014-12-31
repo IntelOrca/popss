@@ -19,3 +19,6 @@ ipch/
 #cmake generated project files
 macMake/
 macXcode/
+
+# NSight user settings
+*.nvuser

@@ -29,9 +29,12 @@ bool LoadTexture(GLuint texture, const char *path)
 	
 	glBindTexture(GL_TEXTURE_2D, texture);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, bits);
 	// glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+	glGenerateMipmap(GL_TEXTURE_2D);
+
 	return true;
 }
 
@@ -49,7 +52,23 @@ LandscapeRenderer::~LandscapeRenderer()
 void LandscapeRenderer::Initialise()
 {
 	int landVectorCounts[] = { 3, 3, 2, 1, 4, 0 };
-	this->landVertexBuffer = new VertexBuffer(landVectorCounts);
+	// this->landVertexBuffer = new VertexBuffer(landVectorCounts);
+
+	// Vertex buffer
+	glGenBuffers(1, &this->landVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, this->landVBO);
+
+	// Vertex array
+	glGenVertexArrays(1, &this->landVAO);
+	glBindVertexArray(this->landVAO);
+	for (int i = 0; i < 5; i++)
+		glEnableVertexAttribArray(i);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(LandVertex), (void*)offsetof(LandVertex, position));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(LandVertex), (void*)offsetof(LandVertex, normal));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(LandVertex), (void*)offsetof(LandVertex, texcoords));
+	glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(LandVertex), (void*)offsetof(LandVertex, texture));
+	glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(LandVertex), (void*)offsetof(LandVertex, material));
 
 	this->landShader = OrcaShader::FromPath("land.vert", "land.frag");
 
@@ -94,7 +113,8 @@ void LandscapeRenderer::Render(const Camera *camera)
 void LandscapeRenderer::RenderArea(const Camera *camera, int viewSize, bool water)
 {
 	// Begin generating the vertices
-	this->landVertexBuffer->Begin();
+	// this->landVertexBuffer->Begin();
+	landVertices.clear();
 
 	float translateX, translateZ;
 	int landOriginX, landOriginZ;
@@ -123,8 +143,13 @@ void LandscapeRenderer::RenderArea(const Camera *camera, int viewSize, bool wate
 	}
 
 	// Finish generation and render primitives
-	this->landVertexBuffer->End();
-	this->landVertexBuffer->Draw(GL_TRIANGLES);
+	glBindBuffer(GL_ARRAY_BUFFER, this->landVBO);
+	glBufferData(GL_ARRAY_BUFFER, this->landVertices.size() * sizeof(LandVertex), this->landVertices.data(), GL_DYNAMIC_DRAW);
+	glBindVertexArray(this->landVAO);
+	glDrawArrays(GL_TRIANGLES, 0, this->landVertices.size());
+
+	// this->landVertexBuffer->End();
+	// this->landVertexBuffer->Draw(GL_TRIANGLES);
 }
 
 
@@ -133,8 +158,8 @@ void LandscapeRenderer::RenderLand(const Camera *camera)
 	// Bind terrain textures
 	for (int i = 0; i < 8; i++) {
 		if (this->terrainTextures[i] != 0) {
-			glBindTexture(GL_TEXTURE_2D, i);
 			glActiveTexture(GL_TEXTURE0 + i);
+			glBindTexture(GL_TEXTURE_2D, this->terrainTextures[i]);
 		}
 	}
 
@@ -269,11 +294,19 @@ void LandscapeRenderer::AddVertex(glm::vec3 position, glm::vec3 normal, glm::vec
 {
 	// glm::vec4 colour = GetColourFromLand(texture);
 
-	this->landVertexBuffer->AddValue(0, position);
-	this->landVertexBuffer->AddValue(1, normal);
-	this->landVertexBuffer->AddValue(2, uv);
-	this->landVertexBuffer->AddValue(3, texture);
-	this->landVertexBuffer->AddValue(4, material);
+	this->landVertices.push_back({
+		position,
+		normal,
+		uv,
+		texture,
+		material
+	});
+
+	// this->landVertexBuffer->AddValue(0, position);
+	// this->landVertexBuffer->AddValue(1, normal);
+	// this->landVertexBuffer->AddValue(2, uv);
+	// this->landVertexBuffer->AddValue(3, texture);
+	// this->landVertexBuffer->AddValue(4, material);
 }
 
 glm::vec2 LandscapeRenderer::GetTextureUV(int landX, int landZ)

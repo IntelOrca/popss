@@ -14,23 +14,30 @@ World::World()
 
 	this->numTerrainStyles = 6;
 	this->terrainStyles = new TerrainStyle[this->numTerrainStyles];
+
+	// Cliff
 	this->terrainStyles[0].textureIndex = 3;
 	this->terrainStyles[0].minSteepness = 256;
 	
+	// Sand
 	this->terrainStyles[1].textureIndex = 0;
 	this->terrainStyles[1].maxHeight = 256;
 	this->terrainStyles[1].maxDistanceFromWater = 3;
 
+	// Low grass
 	this->terrainStyles[2].textureIndex = 1;
 	this->terrainStyles[2].maxHeight = 256;
 	this->terrainStyles[2].diffuseReflectivity = 0.75f;
 
+	// Dirt
 	this->terrainStyles[3].textureIndex = 4;
 	this->terrainStyles[3].maxHeight = 512;
 
+	// High grass
 	this->terrainStyles[4].textureIndex = 1;
 	this->terrainStyles[4].maxHeight = 768;
 
+	// Snow
 	this->terrainStyles[5].textureIndex = 2;
 }
 

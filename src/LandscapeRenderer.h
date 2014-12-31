@@ -42,6 +42,10 @@ private:
 	OrcaShader *landShader;
 	VertexBuffer *landVertexBuffer;
 
+	GLuint landVAO;
+	GLuint landVBO;
+	std::vector<LandVertex> landVertices;
+
 	GLuint terrainTextures[8];
 
 	void LandscapeRenderer::RenderArea(const Camera *camera, int viewSize, bool water);
