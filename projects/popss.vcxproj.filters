@@ -17,6 +17,9 @@
     </ClCompile>
     <ClCompile Include="..\src\WorldObject.cpp" />
     <ClCompile Include="..\src\Unit.cpp" />
+    <ClCompile Include="..\src\util\MathExtensions.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Audio.h" />

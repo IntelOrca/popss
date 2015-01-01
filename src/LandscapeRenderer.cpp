@@ -12,8 +12,8 @@
 
 using namespace IntelOrca::PopSS;
 
-// const float LandscapeRenderer::SphereRatio = 0.00002f;
-const float LandscapeRenderer::SphereRatio = 0.0f;
+const float LandscapeRenderer::SphereRatio = 0.00002f;
+// const float LandscapeRenderer::SphereRatio = 0.0f;
 const float LandscapeRenderer::TextureMapSize = 1.0f / 2.0f;
 
 const VertexAttribPointerInfo LandShaderVertexInfo[] = {
@@ -75,6 +75,7 @@ void LandscapeRenderer::Initialise()
 	this->landShaderUniform.projectionMatrix = this->landShader->GetUniformLocation("ProjectionMatrix");
 	this->landShaderUniform.modelViewMatrix = this->landShader->GetUniformLocation("ModelViewMatrix");
 	this->landShaderUniform.sphereRatio = this->landShader->GetUniformLocation("InputSphereRatio");
+	this->landShaderUniform.cameraTarget = this->landShader->GetUniformLocation("InputCameraTarget");
 	this->landShaderUniform.highlightActive = this->landShader->GetUniformLocation("InputHighlightActive");
 	this->landShaderUniform.highlight00 = this->landShader->GetUniformLocation("InputHighlight00");
 	this->landShaderUniform.highlight11 = this->landShader->GetUniformLocation("InputHighlight11");
@@ -94,6 +95,7 @@ void LandscapeRenderer::Initialise()
 	this->waterShaderUniform.projectionMatrix = this->waterShader->GetUniformLocation("ProjectionMatrix");
 	this->waterShaderUniform.modelViewMatrix = this->waterShader->GetUniformLocation("ModelViewMatrix");
 	this->waterShaderUniform.sphereRatio = this->waterShader->GetUniformLocation("InputSphereRatio");
+	this->waterShaderUniform.cameraTarget = this->waterShader->GetUniformLocation("InputCameraTarget");
 
 	glGenBuffers(1, &this->waterVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, this->waterVBO);
@@ -140,6 +142,9 @@ void LandscapeRenderer::Render(const Camera *camera)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
 		break;
 	}
+
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
 
 	this->RenderLand(camera);
 	this->RenderOcean(camera);
@@ -207,6 +212,7 @@ void LandscapeRenderer::RenderLand(const Camera *camera)
 	glUniformMatrix4fv(this->landShaderUniform.projectionMatrix, 1, GL_FALSE, glm::value_ptr(this->projectionMatrix));
 	glUniformMatrix4fv(this->landShaderUniform.modelViewMatrix, 1, GL_FALSE, glm::value_ptr(this->modelViewMatrix));
 	glUniform1f(this->landShaderUniform.sphereRatio, SphereRatio);
+	glUniform3f(this->landShaderUniform.cameraTarget, camera->target.x, camera->target.y, camera->target.z);
 
 	if (this->world->landHighlightActive) {
 		glm::ivec3 highlight00 = this->world->landHighlightSource;
@@ -327,6 +333,7 @@ void LandscapeRenderer::RenderOcean(const Camera *camera)
 	glUniformMatrix4fv(this->waterShaderUniform.projectionMatrix, 1, GL_FALSE, glm::value_ptr(this->projectionMatrix));
 	glUniformMatrix4fv(this->waterShaderUniform.modelViewMatrix, 1, GL_FALSE, glm::value_ptr(this->modelViewMatrix));
 	glUniform1f(this->waterShaderUniform.sphereRatio, SphereRatio);
+	glUniform3f(this->landShaderUniform.cameraTarget, camera->target.x, camera->target.y, camera->target.z);
 
 	this->SetLightSources(camera, this->waterShader);
 

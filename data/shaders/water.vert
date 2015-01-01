@@ -7,6 +7,7 @@ uniform mat4 ModelViewMatrix;
 uniform mat4 ProjectionMatrix;
 
 uniform float InputSphereRatio;
+uniform vec3 InputCameraTarget;
 
 // Light sources
 uniform int InputLightSourcesCount;
@@ -25,7 +26,7 @@ out float FragmentFog;
 void main()
 {
 	// Distort the vertex position so that we get a spherical effect
-	vec3 newVertexPosition = SphereDistort(VertexPosition, InputSphereRatio);
+	vec3 newVertexPosition = SphereDistort(VertexPosition, InputCameraTarget, InputSphereRatio);
 	FragmentPosition = VertexPosition;
 	FragmentNormal = VertexNormal;
 

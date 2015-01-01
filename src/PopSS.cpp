@@ -113,20 +113,20 @@ void handle_events()
 				_quit = true;
 				break;
 			case SDL_MOUSEBUTTONDOWN:
-				gCursor.button |= event.button.button;
+				gCursor.button |= SDL_BUTTON(event.button.button);
 				gCursorPress.x = event.button.x;
 				gCursorPress.y = event.button.y;
-				gCursorPress.button = event.button.button;
+				gCursorPress.button |= SDL_BUTTON(event.button.button);
 				break;
 			case SDL_MOUSEMOTION:
 				gCursor.x = event.motion.x;
 				gCursor.y = event.motion.y;
 				break;
 			case SDL_MOUSEBUTTONUP:
-				gCursor.button &= ~event.button.button;
+				gCursor.button &= ~SDL_BUTTON(event.button.button);
 				gCursorRelease.x = event.button.x;
 				gCursorRelease.y = event.button.y;
-				gCursorRelease.button = event.button.button;
+				gCursorRelease.button |= SDL_BUTTON(event.button.button);
 				break;
 			case SDL_MOUSEWHEEL:
 				gCursor.wheel = event.wheel.y;

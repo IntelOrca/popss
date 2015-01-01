@@ -6,6 +6,7 @@
 namespace IntelOrca { namespace PopSS {
 
 class TerrainStyle;
+class Unit;
 class WorldObject;
 
 struct WorldTile {
@@ -30,6 +31,7 @@ public:
 	bool landHighlightActive;
 	glm::ivec3 landHighlightSource;
 	glm::ivec3 landHighlightTarget;
+	std::list<Unit*> selectedUnits;
 
 	World();
 	~World();
@@ -52,6 +54,7 @@ public:
 	void LoadLandFromPOPTB(const char *path);
 
 	WorldTile *GetTile(int x, int z) const;
+	int GetHeight(int x, int z) const;
 
 	template<typename T>
 	T Wrap(T xz) const { return wraprange((T)0, xz, (T)(this->size * TileSize)); }

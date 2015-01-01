@@ -30,6 +30,7 @@ struct LandWaterShaderUniform {
 	GLint projectionMatrix;
 	GLint modelViewMatrix;
 	GLint sphereRatio;
+	GLint cameraTarget;
 	GLint highlightActive;
 	GLint highlight00;
 	GLint highlight11;

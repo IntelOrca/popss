@@ -27,7 +27,7 @@ public:
 	glm::mat4 Get3dProjectionMatrix() const;
 	glm::mat4 Get3dViewMatrix() const;
 
-	glm::ivec3 GetWorldPositionFromViewport(int x, int y) const;
+	bool GetWorldPositionFromViewport(int x, int y, glm::ivec3 *outPosition) const;
 
 	void RotateLeft();
 	void RotateRight();
@@ -39,6 +39,9 @@ public:
 
 private:
 	void UpdateEye();
+
+	glm::vec3 GetViewportRayDirection(int x, int y) const;
+	glm::vec3 SphereDistort(const glm::vec3 &position, float ratio) const;
 };
 
 } }

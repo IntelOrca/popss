@@ -1,4 +1,6 @@
 #include "GameView.h"
+#include "Unit.h"
+#include "WorldObject.h"
 
 using namespace IntelOrca::PopSS;
 
@@ -40,21 +42,47 @@ void GameView::Update()
 	if (gCursor.wheel != 0)
 		this->camera.SetZoom(this->camera.zoom + (gCursor.wheel * 32));
 
+	if (gCursorPress.button & SDL_BUTTON_RMASK) {
+		for (Unit *unit : this->world.selectedUnits)
+			unit->selected = false;
+
+		this->world.selectedUnits.clear();
+	}
+
 	if (gCursor.button & SDL_BUTTON_LMASK) {
-		glm::ivec3 worldPosition = this->camera.GetWorldPositionFromViewport(gCursor.x, gCursor.y);
-		if (worldPosition != glm::ivec3(INT32_MIN)) {
-			if (gCursorPress.button & SDL_BUTTON_LMASK) {
-				this->world.landHighlightSource.x = worldPosition.x;
-				this->world.landHighlightSource.z = worldPosition.z;
-				this->world.landHighlightTarget.x = worldPosition.x;
-				this->world.landHighlightTarget.z = worldPosition.z;
+		glm::ivec3 worldPosition;
+		if (this->camera.GetWorldPositionFromViewport(gCursor.x, gCursor.y, &worldPosition)) {
+			if (this->world.selectedUnits.size() == 0) {
+				if (gCursorPress.button & SDL_BUTTON_LMASK) {
+					this->world.landHighlightSource.x = worldPosition.x;
+					this->world.landHighlightSource.z = worldPosition.z;
+					this->world.landHighlightTarget.x = worldPosition.x;
+					this->world.landHighlightTarget.z = worldPosition.z;
+				} else {
+					this->world.landHighlightTarget.x = worldPosition.x;
+					this->world.landHighlightTarget.z = worldPosition.z;
+				}
+				this->world.landHighlightActive = true;
 			} else {
-				this->world.landHighlightTarget.x = worldPosition.x;
-				this->world.landHighlightTarget.z = worldPosition.z;
+				for (Unit *unit : this->world.selectedUnits)
+					unit->GiveMoveOrder(worldPosition.x, worldPosition.z);
 			}
 		}
-		this->world.landHighlightActive = true;
 	} else {
+		if (this->world.landHighlightActive) {
+			glm::ivec3 source = this->world.landHighlightSource;
+			glm::ivec3 target = this->world.landHighlightTarget;
+
+			for (WorldObject *obj : this->world.objects) {
+				if (obj->x >= source.x && obj->z >= source.z && obj->x <= target.x && obj->z <= target.z) {
+					if (obj->group == OBJECT_GROUP_UNIT) {
+						Unit *unit = (Unit*)obj;
+						unit->selected = true;
+						this->world.selectedUnits.push_back(unit);
+					}
+				}
+			}
+		}
 		this->world.landHighlightActive = false;
 	}
 

@@ -103,10 +103,9 @@ GLuint OrcaShader::LoadShader(GLenum type, const char *path)
 	
 	glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
 	if (status != GL_TRUE) {
-		glDeleteShader(shader);
-
 		char buffer[512];
-		glGetShaderInfoLog(shader, 512, NULL, buffer);
+		glGetShaderInfoLog(shader, sizeof(buffer), NULL, buffer);
+		glDeleteShader(shader);
 		fprintf(stderr, buffer);
 		return 0;
 	}

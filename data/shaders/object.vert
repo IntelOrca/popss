@@ -8,6 +8,7 @@ uniform mat4 ViewMatrix;
 uniform mat4 ProjectionMatrix;
 
 uniform float InputSphereRatio;
+uniform vec3 InputCameraTarget;
 
 // Light sources
 uniform int InputLightSourcesCount;
@@ -22,7 +23,7 @@ out float FragmentFog;
 void main()
 {
 	vec3 modelVertexPosition = (ModelMatrix * vec4(VertexPosition, 1.0)).xyz;
-	vec3 distortedVertexPosition = SphereDistort(modelVertexPosition, InputSphereRatio);
+	vec3 distortedVertexPosition = SphereDistort(modelVertexPosition, InputCameraTarget, InputSphereRatio);
 
 	// Calculate fragment lighting
 	vec3 totalLighting = vec3(0.0);

@@ -4,6 +4,8 @@ using namespace IntelOrca::PopSS;
 
 WorldObject::WorldObject()
 {
+	this->type = 0;
+	this->group = 0;
 	this->position = glm::vec3(0);
 	this->ownership = OWNERSHIP_NEUTRAL;
 	this->rotation = 0;

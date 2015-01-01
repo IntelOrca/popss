@@ -44,10 +44,19 @@ World::World()
 	// Snow
 	this->terrainStyles[5].textureIndex = 2;
 
-	Unit *unit = new Unit();
-	unit->position = glm::vec3(128, 64, 120);
+	glm::ivec2 unitPositions[] = {
+		{ 128, 120 },
+		{ 128, 121 },
+		{ 128, 122 },
+		{ 128, 123 },
+		{ 128, 124 }
+	};
 
-	this->objects.push_back(unit);
+	for (glm::ivec2 unitPosition : unitPositions) {
+		Unit *unit = new Unit();
+		unit->position = glm::vec3(unitPosition.x * World::TileSize, 0, unitPosition.y * World::TileSize);
+		this->objects.push_back(unit);
+	}
 }
 
 World::~World()
@@ -264,6 +273,36 @@ void World::LoadLandFromPOPTB(const char *path)
 
 WorldTile *World::GetTile(int x, int z) const
 {
-	int wtf = this->TileWrap(x) + (this->TileWrap(z) * this->size);
-	return &this->tiles[wtf];
+	return &this->tiles[this->TileWrap(x) + (this->TileWrap(z) * this->size)];
+}
+
+int World::GetHeight(int x, int z) const
+{
+	int modx = x % World::TileSize;
+	int modz = z % World::TileSize;
+
+	if (modx == 0 && modz == 0)
+		return GetTile(x / World::TileSize, z / World::TileSize)->height;
+
+	int landx0 = x / World::TileSize;
+	int landz0 = z / World::TileSize;
+	int landx1 = landx0 + 1;
+	int landz1 = landz0 + 1;
+
+	int height00 = GetTile(landx0, landz0)->height;
+	int height01 = GetTile(landx0, landz1)->height;
+	int height10 = GetTile(landx1, landz0)->height;
+	int height11 = GetTile(landx1, landz1)->height;
+
+	if (modx + modz < World::TileSize) {
+		// Top left triangle
+		int heightX = ((height10 - height00) * modx) / World::TileSize;
+		int heightZ = ((height01 - height00) * modz) / World::TileSize;
+		return height00 + heightX + heightZ;
+	} else {
+		// Bottom right triangle
+		int heightX = ((height01 - height11) * (World::TileSize - modx)) / World::TileSize;
+		int heightZ = ((height10 - height11) * (World::TileSize - modz)) / World::TileSize;
+		return height11 + heightX + heightZ;
+	}
 }

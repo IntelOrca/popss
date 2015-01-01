@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdlib.h>
+#include "../PopSS.h"
 
 template<typename T>
 void splitdecimalcomponents(T x, int *whole, T *fraction)
@@ -47,3 +47,19 @@ T toradians(T x)
 {
 	return x * (T)(M_PI / 180);
 }
+
+bool PlaneIntersect(
+	const glm::vec3 &orig, const glm::vec3 &dir,
+	const glm::vec3 &p0, const glm::vec3 &pNormal,
+	float *outT
+);
+
+/**
+ * Möller–Trumbore intersection algorithm
+ * @cite http://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
+ */
+bool TriangleIntersect(
+	const glm::vec3 &orig, const glm::vec3 &dir,
+	const glm::vec3 &v0, const glm::vec3 &v1, const glm::vec3 &v2,
+	float *out
+);

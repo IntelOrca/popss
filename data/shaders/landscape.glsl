@@ -1,15 +1,16 @@
 ﻿// Lighting include shader
 
-vec3 SphereDistort(vec3 position, float ratio)
+vec3 SphereDistort(in vec3 position, in vec3 cameraTarget, in float ratio)
 {
+	vec3 relative = position - cameraTarget;
 	return vec3(
 		position.x,
-		position.y - (ratio * (position.x * position.x + position.z * position.z)),
+		position.y - (ratio * (relative.x * relative.x + relative.z * relative.z)),
 		position.z
 	);
 }
 
-float GetFogFactor(vec3 position, float minDistance, float maxDistance)
+float GetFogFactor(in vec3 position, in float minDistance, in float maxDistance)
 {
 	float distance = sqrt(position.x * position.x + position.z * position.z);
 	if (distance > minDistance)

@@ -28,6 +28,7 @@
     <ClCompile Include="..\src\PopSS.cpp" />
     <ClCompile Include="..\src\TerrainStyle.cpp" />
     <ClCompile Include="..\src\Unit.cpp" />
+    <ClCompile Include="..\src\util\MathExtensions.cpp" />
     <ClCompile Include="..\src\World.cpp" />
     <ClCompile Include="..\src\WorldObject.cpp" />
   </ItemGroup>
