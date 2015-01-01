@@ -15,7 +15,8 @@
     <ClCompile Include="..\lib\lodepng\lodepng.cpp">
       <Filter>Libraries</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\VertexBuffer.cpp" />
+    <ClCompile Include="..\src\WorldObject.cpp" />
+    <ClCompile Include="..\src\Unit.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Audio.h" />
@@ -32,8 +33,9 @@
     </ClInclude>
     <ClInclude Include="..\src\GameView.h" />
     <ClInclude Include="..\src\OrcaShader.h" />
-    <ClInclude Include="..\src\VertexBuffer.h" />
     <ClInclude Include="..\src\LightSource.h" />
+    <ClInclude Include="..\src\WorldObject.h" />
+    <ClInclude Include="..\src\Unit.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Util">

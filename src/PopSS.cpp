@@ -7,6 +7,10 @@ SDL_GLContext gglContext;
 bool gIsScanKeyDown[256] = { 0 };
 bool gIsKeyDown[256] = { 0 };
 
+cursor gCursor;
+cursor gCursorPress;
+cursor gCursorRelease;
+
 static bool _quit = false;
 
 static bool _updateStepMode = false;
@@ -66,6 +70,10 @@ void handle_events()
 {
 	SDL_Event event;
 
+	gCursor.wheel = 0;
+	gCursorPress.button = 0;
+	gCursorRelease.button = 0;
+
 	while (SDL_PollEvent(&event)) {
 		switch (event.type) {
 			case SDL_KEYDOWN:
@@ -105,12 +113,23 @@ void handle_events()
 				_quit = true;
 				break;
 			case SDL_MOUSEBUTTONDOWN:
+				gCursor.button |= event.button.button;
+				gCursorPress.x = event.button.x;
+				gCursorPress.y = event.button.y;
+				gCursorPress.button = event.button.button;
 				break;
 			case SDL_MOUSEMOTION:
+				gCursor.x = event.motion.x;
+				gCursor.y = event.motion.y;
 				break;
 			case SDL_MOUSEBUTTONUP:
+				gCursor.button &= ~event.button.button;
+				gCursorRelease.x = event.button.x;
+				gCursorRelease.y = event.button.y;
+				gCursorRelease.button = event.button.button;
 				break;
 			case SDL_MOUSEWHEEL:
+				gCursor.wheel = event.wheel.y;
 				break;
 		}
 	}
@@ -140,6 +159,7 @@ int main(int argc, char** argv)
 		return -1;
 
 	_gameView = new IntelOrca::PopSS::GameView();
+	IntelOrca::PopSS::gGameView = _gameView;
 
 	while (!_quit) {
 		handle_events();

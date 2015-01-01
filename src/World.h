@@ -1,10 +1,12 @@
 #pragma once
 
 #include "PopSS.h"
+#include "Util/MathExtensions.hpp"
 
 namespace IntelOrca { namespace PopSS {
 
 class TerrainStyle;
+class WorldObject;
 
 struct WorldTile {
 	unsigned int height;
@@ -15,7 +17,7 @@ struct WorldTile {
 
 class World {
 public:
-	static const float TileSize;
+	static const int TileSize;
 	static const float OceanTileSize;
 	static const float SkyDomeRadius;
 
@@ -23,9 +25,17 @@ public:
 	int numTerrainStyles;
 	TerrainStyle *terrainStyles;
 
+	std::list<WorldObject*> objects;
+
+	bool landHighlightActive;
+	glm::ivec3 landHighlightSource;
+	glm::ivec3 landHighlightTarget;
+
 	World();
 	~World();
 	
+	void Update();
+
 	void Reprocess();
 	void ProcessTile(int x, int z);
 	
@@ -44,17 +54,16 @@ public:
 	WorldTile *GetTile(int x, int z) const;
 
 	template<typename T>
-	T MapWrap(T xz) const {
-		while (xz < 0)
-			xz += this->size;
-		while (xz >= this->size)
-			xz -= this->size;
-		return xz;
-	}
+	T Wrap(T xz) const { return wraprange((T)0, xz, (T)(this->size * TileSize)); }
+
+	template<typename T>
+	T TileWrap(T xz) const { return wraprange((T)0, xz, (T)this->size); }
 
 private:
 	WorldTile *tiles;
 	int *distanceFromWaterMap;
 };
+
+extern World *gWorld;
 
 } }

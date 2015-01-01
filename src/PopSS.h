@@ -26,6 +26,7 @@
 #include <SDL.h>
 
 #include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #define abstract
 #define interface struct
@@ -59,13 +60,37 @@ struct trect {
 		this->w = w;
 		this->h = h;
 	}
+
+	T left() const { return this->x; }
+	T top() const { return this->y; }
+	T right() const { return this->x + this->w; }
+	T bottom() const { return this->y + this->h; }
+
+	void setLeft(T value) {
+		this->w = this->x + this->w - value;
+		this->x = value;
+	}
+	void setTop(T value) {
+		this->h = this->y + this->h - value;
+		this->y = value;
+	}
+	void setRight(T value) { this->w = value - this->x; }
+	void setBottom(T value) { this->h = value - this->y; }
 };
 
 typedef trect<float> rect;
-typedef trect<int> recti;
+typedef trect<int> irect;
 
 extern SDL_Window *glWindow;
 extern SDL_GLContext gglContext;
 
 extern bool gIsScanKeyDown[];
 extern bool gIsKeyDown[];
+
+struct cursor {
+	int x, y, button, wheel;
+};
+
+extern cursor gCursor;
+extern cursor gCursorPress;
+extern cursor gCursorRelease;

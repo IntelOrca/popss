@@ -1,4 +1,4 @@
-#version 400
+#version 330
 
 #include "landscape.glsl"
 #include "lighting.glsl"
@@ -12,26 +12,18 @@ uniform float InputSphereRatio;
 uniform int InputLightSourcesCount;
 uniform LightSource InputLightSources[8];
 
-layout (location = 0) in vec3 VertexPosition;
-layout (location = 1) in vec3 VertexNormal;
-layout (location = 2) in vec2 VertexTextureCoords;
-layout (location = 3) in float VertexTexture;
-layout (location = 4) in vec4 VertexMaterial;
+in vec3 VertexPosition;
+in vec3 VertexNormal;
+in vec2 VertexTextureCoords;
 
 out vec3 FragmentPosition;
 out vec3 FragmentNormal;
 out vec2 FragmentTextureCoords;
-out vec4 FragmentTexture;
 out vec3 FragmentLighting;
 out float FragmentFog;
 
 void main()
 {
-	if (InputSphereRatio == 0) {
-		gl_Position = vec4(0.0);
-		return;
-	}
-
 	// Distort the vertex position so that we get a spherical effect
 	vec3 newVertexPosition = SphereDistort(VertexPosition, InputSphereRatio);
 	FragmentPosition = VertexPosition;
@@ -39,7 +31,6 @@ void main()
 
 	// Fragment texture
 	FragmentTextureCoords = VertexTextureCoords;
-	FragmentTexture = vec4(0.0);
 
 	// Calculate fragment lighting
 	vec3 totalLighting = vec3(0.0);
@@ -58,5 +49,5 @@ void main()
 	FragmentFog = GetFogFactor(VertexPosition, 256 * 8, 256 * 16);
 
 	// Position
-    gl_Position = ProjectionMatrix * ModelViewMatrix * vec4(newVertexPosition, 1.0);
+	gl_Position = ProjectionMatrix * ModelViewMatrix * vec4(newVertexPosition, 1.0);
 }

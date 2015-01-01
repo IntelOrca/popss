@@ -1,9 +1,13 @@
 #include "TerrainStyle.h"
+#include "Unit.h"
 #include "World.h"
+#include "WorldObject.h"
 
 using namespace IntelOrca::PopSS;
 
-const float World::TileSize = 128.0f;
+World *IntelOrca::PopSS::gWorld;
+
+const int World::TileSize = 128;
 const float World::OceanTileSize = TileSize / 1.0f;
 const float World::SkyDomeRadius = 96.0f * TileSize;
 
@@ -39,6 +43,11 @@ World::World()
 
 	// Snow
 	this->terrainStyles[5].textureIndex = 2;
+
+	Unit *unit = new Unit();
+	unit->position = glm::vec3(128, 64, 120);
+
+	this->objects.push_back(unit);
 }
 
 World::~World()
@@ -48,6 +57,12 @@ World::~World()
 
 	if (this->distanceFromWaterMap == NULL)
 		delete[] this->distanceFromWaterMap;
+}
+
+void World::Update()
+{
+	for (WorldObject *obj : this->objects)
+		obj->Update();
 }
 
 void World::Reprocess()
@@ -101,8 +116,8 @@ int *World::GenerateDistanceFromWaterMap() const
 
 		for (int z = -1; z <= 1; z++) {
 			for (int x = -1; x <= 1; x++) {
-				int xx = MapWrap(tile.x + x);
-				int zz = MapWrap(tile.z + z);
+				int xx = TileWrap(tile.x + x);
+				int zz = TileWrap(tile.z + z);
 
 				if (distanceMap[xx + (zz * this->size)] != -1)
 					continue;
@@ -249,5 +264,6 @@ void World::LoadLandFromPOPTB(const char *path)
 
 WorldTile *World::GetTile(int x, int z) const
 {
-	return &this->tiles[this->MapWrap(x) + (this->MapWrap(z) * this->size)];
+	int wtf = this->TileWrap(x) + (this->TileWrap(z) * this->size);
+	return &this->tiles[wtf];
 }

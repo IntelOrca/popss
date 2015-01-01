@@ -14,7 +14,7 @@ T wraprange(T low, T x, T high)
 {
 	while (x < low)
 		x += (high - low);
-	while (x > high)
+	while (x >= high)
 		x -= (high - low);
 	return x;
 }

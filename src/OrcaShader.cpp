@@ -21,12 +21,50 @@ void OrcaShader::Use() const
 	glUseProgram(this->program);
 }
 
+GLint OrcaShader::GetUniformLocation(const char *name) const
+{
+	return glGetUniformLocation(this->program, name);
+}
+
+GLint OrcaShader::GetAttributeLocation(const char *name) const
+{
+	return glGetAttribLocation(this->program, name);
+}
+
+void OrcaShader::SetVertexAttribPointer(int stride, const VertexAttribPointerInfo *vertexInfo)
+{
+	while (vertexInfo->name != NULL) {
+		GLint attributeLocation = this->GetAttributeLocation(vertexInfo->name);
+
+		glEnableVertexAttribArray(attributeLocation);
+
+		switch (vertexInfo->type) {
+		case GL_BYTE:
+		case GL_UNSIGNED_BYTE:
+		case GL_SHORT:
+		case GL_UNSIGNED_SHORT:
+		case GL_INT:
+		case GL_UNSIGNED_INT:
+			glVertexAttribIPointer(attributeLocation, vertexInfo->size, vertexInfo->type, stride, (void*)vertexInfo->offset);
+			break;
+		case GL_DOUBLE:
+			glVertexAttribLPointer(attributeLocation, vertexInfo->size, vertexInfo->type, stride, (void*)vertexInfo->offset);
+			break;
+		default:
+			glVertexAttribPointer(attributeLocation, vertexInfo->size, vertexInfo->type, GL_FALSE, stride, (void*)vertexInfo->offset);
+			break;
+		}
+
+		vertexInfo++;
+	}
+}
+
 OrcaShader *OrcaShader::FromPath(const char *vertexPath, const char *fragmentPath)
 {
 	OrcaShader *shader = new OrcaShader();
 
-	shader->vertexShader = OrcaShader::LoadShader(GL_VERTEX_SHADER, "land.vert");
-	shader->fragmentShader = OrcaShader::LoadShader(GL_FRAGMENT_SHADER, "land.frag");
+	shader->vertexShader = OrcaShader::LoadShader(GL_VERTEX_SHADER, vertexPath);
+	shader->fragmentShader = OrcaShader::LoadShader(GL_FRAGMENT_SHADER, fragmentPath);
 
 	if (shader->vertexShader == 0 || shader->fragmentShader == 0) {
 		delete shader;

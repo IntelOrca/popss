@@ -27,8 +27,9 @@
     <ClCompile Include="..\src\OrcaShader.cpp" />
     <ClCompile Include="..\src\PopSS.cpp" />
     <ClCompile Include="..\src\TerrainStyle.cpp" />
-    <ClCompile Include="..\src\VertexBuffer.cpp" />
+    <ClCompile Include="..\src\Unit.cpp" />
     <ClCompile Include="..\src\World.cpp" />
+    <ClCompile Include="..\src\WorldObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Audio.h" />
@@ -39,10 +40,11 @@
     <ClInclude Include="..\src\OrcaShader.h" />
     <ClInclude Include="..\src\PopSS.h" />
     <ClInclude Include="..\src\TerrainStyle.h" />
+    <ClInclude Include="..\src\Unit.h" />
     <ClInclude Include="..\src\util\MathExtensions.hpp" />
     <ClInclude Include="..\src\util\Random.hpp" />
-    <ClInclude Include="..\src\VertexBuffer.h" />
     <ClInclude Include="..\src\World.h" />
+    <ClInclude Include="..\src\WorldObject.h" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="..\app.manifest" />

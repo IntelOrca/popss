@@ -1,4 +1,4 @@
-#version 400
+#version 330
 
 #include "landscape.glsl"
 #include "lighting.glsl"
@@ -13,8 +13,8 @@ uniform float InputSphereRatio;
 uniform int InputLightSourcesCount;
 uniform LightSource InputLightSources[8];
 
-layout (location = 0) in vec3 VertexPosition;
-layout (location = 1) in vec3 VertexNormal;
+in vec3 VertexPosition;
+in vec3 VertexNormal;
 
 out vec3 FragmentLighting;
 out float FragmentFog;

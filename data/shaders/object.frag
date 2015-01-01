@@ -1,9 +1,9 @@
-#version 400
+#version 330
 
 in vec3 FragmentLighting;
 in float FragmentFog;
 
-layout (location = 0) out vec4 OutputColour;
+out vec4 OutputColour;
 
 void main()
 {

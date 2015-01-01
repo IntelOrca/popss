@@ -1,4 +1,4 @@
-#version 400
+#version 330
 
 #include "lighting.glsl"
 
@@ -11,7 +11,6 @@ uniform LightSource InputLightSources[8];
 in vec3 FragmentPosition;
 in vec3 FragmentNormal;
 in vec2 FragmentTextureCoords;
-in vec4 FragmentTexture;
 in vec3 FragmentLighting;
 in float FragmentFog;
 
@@ -24,14 +23,14 @@ void main()
 {
 	// bump
 	vec4 wave = texture(InputTexture0, FragmentTextureCoords);
-    float s11 = wave.x;
-    float s01 = textureOffset(InputTexture0, FragmentTextureCoords, off.xy).x;
-    float s21 = textureOffset(InputTexture0, FragmentTextureCoords, off.zy).x;
-    float s10 = textureOffset(InputTexture0, FragmentTextureCoords, off.yx).x;
-    float s12 = textureOffset(InputTexture0, FragmentTextureCoords, off.yz).x;
-    vec3 va = normalize(vec3(size.x,s21-s01,size.y));
-    vec3 vb = normalize(vec3(size.y,s12-s10,-size.x));
-    vec4 bump = vec4( cross(va,vb), s11 );
+	float s11 = wave.x;
+	float s01 = textureOffset(InputTexture0, FragmentTextureCoords, off.xy).x;
+	float s21 = textureOffset(InputTexture0, FragmentTextureCoords, off.zy).x;
+	float s10 = textureOffset(InputTexture0, FragmentTextureCoords, off.yx).x;
+	float s12 = textureOffset(InputTexture0, FragmentTextureCoords, off.yz).x;
+	vec3 va = normalize(vec3(size.x,s21-s01,size.y));
+	vec3 vb = normalize(vec3(size.y,s12-s10,-size.x));
+	vec4 bump = vec4(cross(va,vb), s11);
 
 	vec3 position = FragmentPosition;
 	position.y += bump.w;

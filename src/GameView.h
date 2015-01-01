@@ -24,4 +24,6 @@ private:
 	LandscapeRenderer landscapeRenderer;
 };
 
+extern GameView *gGameView;
+
 } }
