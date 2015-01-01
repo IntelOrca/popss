@@ -28,13 +28,13 @@ void GameView::Update()
 	this->world.Update();
 
 	// Input
-	if (gIsScanKeyDown[SDL_SCANCODE_UP])
+	if (gIsScanKeyDown[SDL_SCANCODE_UP] || gIsKeyDown[SDLK_w])
 		this->camera.MoveForwards();
-	if (gIsScanKeyDown[SDL_SCANCODE_DOWN])
+	if (gIsScanKeyDown[SDL_SCANCODE_DOWN] || gIsKeyDown[SDLK_s])
 		this->camera.MoveBackwards();
-	if (gIsScanKeyDown[SDL_SCANCODE_LEFT])
+	if (gIsScanKeyDown[SDL_SCANCODE_LEFT] || gIsKeyDown[SDLK_a])
 		this->camera.RotateLeft();
-	if (gIsScanKeyDown[SDL_SCANCODE_RIGHT])
+	if (gIsScanKeyDown[SDL_SCANCODE_RIGHT] || gIsKeyDown[SDLK_d])
 		this->camera.RotateRight();
 
 	if (gCursor.wheel != 0)
@@ -42,8 +42,6 @@ void GameView::Update()
 
 	if (gCursor.button & SDL_BUTTON_LMASK) {
 		glm::ivec3 worldPosition = this->camera.GetWorldPositionFromViewport(gCursor.x, gCursor.y);
-		worldPosition.x = this->world.Wrap(worldPosition.x);
-		worldPosition.z = this->world.Wrap(worldPosition.z);
 		if (worldPosition != glm::ivec3(INT32_MIN)) {
 			if (gCursorPress.button & SDL_BUTTON_LMASK) {
 				this->world.landHighlightSource.x = worldPosition.x;

@@ -209,14 +209,16 @@ void LandscapeRenderer::RenderLand(const Camera *camera)
 	glUniform1f(this->landShaderUniform.sphereRatio, SphereRatio);
 
 	if (this->world->landHighlightActive) {
-		glm::ivec3 highlight00 = this->world->landHighlightSource - (glm::ivec3)camera->target;
-		glm::ivec3 highlight11 = this->world->landHighlightTarget - (glm::ivec3)camera->target;
+		glm::ivec3 highlight00 = this->world->landHighlightSource;
+		glm::ivec3 highlight11 = this->world->landHighlightTarget;
+
 		int tmp;
 		if (highlight00.x > highlight11.x) {
 			tmp = highlight00.x;
 			highlight00.x = highlight11.x;
 			highlight11.x = tmp;
 		}
+
 		if (highlight00.z > highlight11.z) {
 			tmp = highlight00.z;
 			highlight00.z = highlight11.z;
