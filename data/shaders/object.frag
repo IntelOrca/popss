@@ -1,5 +1,8 @@
 #version 330
 
+uniform sampler2D InputTexture;
+
+in vec2 FragmentTextureCoords;
 in vec3 FragmentLighting;
 in float FragmentFog;
 
@@ -7,10 +10,12 @@ out vec4 OutputColour;
 
 void main()
 {
-	vec4 colour = vec4(1.0);
+	vec4 colour = texture(InputTexture, FragmentTextureCoords.xy);
+	if (colour.a == 0)
+		discard;
 
 	// Apply fog
-	vec4 fogColour = vec4(0.5, 0.5, 0.5, 1.0);
+	vec4 fogColour = vec4(0.8, 0.8, 0.8, 1.0);
 	colour = mix(colour, fogColour, FragmentFog);
 
 	// Apply lighting

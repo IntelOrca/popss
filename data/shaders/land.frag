@@ -29,8 +29,9 @@ void main()
 	vec4 colour = vec4(multiTexel, 1.0);
 
 	// Apply fog
-	// vec4 fogColour = vec4(0.5, 0.5, 0.5, 1.0);
-	// colour = mix(colour, fogColour, FragmentFog);
+	float luma = colour.r * 0.2126 + colour.g + 0.7152 + colour.b * 0.0722;
+	vec3 fogColour = vec3(luma);
+	colour.rgb = mix(colour.rgb, fogColour, FragmentFog);
 
 	// Apply lighting
 	colour *= vec4(FragmentLighting, 1.0);
@@ -45,8 +46,8 @@ void main()
 	}
 
 	// Apply long distance fade out
-	// if (FragmentFog >= 0.75)
-	//	colour.a = mix(colour.a, 0.0, (FragmentFog - 0.75) / 0.25);
+	if (FragmentFog >= 0.75)
+		colour.rgb = mix(colour.rgb, vec3(0), (FragmentFog - 0.75) / 0.25);
 
 	// Output the colour
 	OutputColour = colour;

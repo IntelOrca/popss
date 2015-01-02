@@ -7,6 +7,7 @@ namespace IntelOrca { namespace PopSS {
 struct ObjectVertex {
 	glm::vec3 position;
 	glm::vec3 normal;
+	glm::vec2 texcoords;
 };
 
 class Camera;
@@ -25,6 +26,7 @@ public:
 
 private:
 	Mesh *vokMesh;
+	GLuint vokTexture;
 
 	OrcaShader *objectShader = NULL;
 	GLuint objectVAO;
@@ -37,6 +39,7 @@ private:
 		GLint modelMatrix;
 		GLint sphereRatio;
 		GLint cameraTarget;
+		GLint texture;
 	} objectShaderUniforms;
 
 	void PrepareMesh(const Mesh *mesh);

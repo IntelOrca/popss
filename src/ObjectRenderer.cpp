@@ -12,9 +12,12 @@
 
 using namespace IntelOrca::PopSS;
 
+bool LoadTexture(GLuint texture, const char *path);
+
 const VertexAttribPointerInfo ObjectShaderVertexInfo[] = {
-	{ "VertexPosition",		GL_FLOAT,	3,	offsetof(ObjectVertex, position)	},
-	{ "VertexNormal",		GL_FLOAT,	3,	offsetof(ObjectVertex, normal)		},
+	{ "VertexPosition",			GL_FLOAT,	3,	offsetof(ObjectVertex, position)	},
+	{ "VertexNormal",			GL_FLOAT,	3,	offsetof(ObjectVertex, normal)		},
+	{ "VertexTextureCoords",	GL_FLOAT,	2,	offsetof(ObjectVertex, texcoords)	},
 	{ NULL }
 };
 
@@ -36,6 +39,7 @@ void ObjectRenderer::Initialise()
 	this->objectShaderUniforms.modelMatrix = this->objectShader->GetUniformLocation("ModelMatrix");
 	this->objectShaderUniforms.sphereRatio = this->objectShader->GetUniformLocation("InputSphereRatio");
 	this->objectShaderUniforms.cameraTarget = this->objectShader->GetUniformLocation("InputCameraTarget");
+	this->objectShaderUniforms.texture = this->objectShader->GetUniformLocation("InputTexture");
 
 	glGenVertexArrays(1, &this->objectVAO);
 	glGenBuffers(1, &this->objectVBO);
@@ -44,11 +48,26 @@ void ObjectRenderer::Initialise()
 	glBindBuffer(GL_ARRAY_BUFFER, this->objectVBO);
 	this->objectShader->SetVertexAttribPointer(sizeof(ObjectVertex), ObjectShaderVertexInfo);
 
-	this->vokMesh = Mesh::FromObjFile("data/objects/vok.obj");
+	this->vokMesh = Mesh::FromObjectFile("data/objects/vok.object");
+
+	glGenTextures(1, &this->vokTexture);
+	LoadTexture(this->vokTexture, "data/objects/vok.png");
 }
 
 void ObjectRenderer::Render(const Camera *camera)
 {
+	switch (this->debugRenderType) {
+	case DEBUG_LANDSCAPE_RENDER_TYPE_NONE:
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		break;
+	case DEBUG_LANDSCAPE_RENDER_TYPE_WIREFRAME:
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		break;
+	case DEBUG_LANDSCAPE_RENDER_TYPE_POINTS:
+		glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+		break;
+	}
+
 	glm::mat4 pmatrix = camera->Get3dProjectionMatrix();
 	glm::mat4 vmatrix = camera->Get3dViewMatrix();
 
@@ -60,12 +79,15 @@ void ObjectRenderer::Render(const Camera *camera)
 	glUniformMatrix4fv(this->objectShaderUniforms.viewMatrix, 1, GL_FALSE, glm::value_ptr(vmatrix));
 	glUniform1f(this->objectShaderUniforms.sphereRatio, LandscapeRenderer::SphereRatio);
 	glUniform3fv(this->objectShaderUniforms.cameraTarget, 1, glm::value_ptr(camera->target));
+	glUniform1i(this->objectShaderUniforms.texture, 0);
 	SetLightSources(camera, this->objectShader);
 
 	glBindVertexArray(this->objectVAO);
 	glBindBuffer(GL_ARRAY_BUFFER, this->objectVBO);
 
 	// Render vault of knowledges
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, this->vokTexture);
 	PrepareMesh(this->vokMesh);
 	for (WorldObject *worldObject : this->world->objects) {
 		if (worldObject->type == BUILDING_VAULT_OF_KNOWLEDGE && worldObject->group == OBJECT_GROUP_BUILDING) {	
@@ -86,15 +108,19 @@ void ObjectRenderer::PrepareMesh(const Mesh *mesh)
 	for (int i = 0; i < mesh->numFaces; i++) {
 		const Mesh::Face *face = &mesh->faces[i];
 		glm::vec3 vertices[3];
+		glm::vec2 texcoords[3];
 		
-		for (int j = 0; j < 3; j++)
-			vertices[j] = mesh->vertices[face->vertex[j]];
+		for (int j = 0; j < 3; j++) {
+			vertices[j] = mesh->vertices[face->vertex[j].position];
+			texcoords[j] = face->vertex[j].texture == -1 ? glm::vec2(0) : mesh->textureCoordinates[face->vertex[j].texture];
+		}
 
 		glm::vec3 normal = glm::normalize(glm::cross(vertices[1] - vertices[0], vertices[2] - vertices[0]));
 		for (int j = 0; j < 3; j++) {
 			ObjectVertex vertex;
 			vertex.position = vertices[j];
 			vertex.normal = normal;
+			vertex.texcoords = texcoords[j];
 			this->objectVertices.push_back(vertex);
 		}
 	}

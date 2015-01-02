@@ -16,6 +16,7 @@ Camera::Camera()
 	// this->target = glm::vec3(0, 512 + 128, 0);
 	this->target = glm::vec3(128 * World::TileSize, 512 + 128, 128 * World::TileSize);
 	this->zoom = 1024.0 + 256;
+	this->targetZoom = this->zoom;
 	SetRotation(0.0f);
 	this->viewHasChanged = true;
 }
@@ -119,6 +120,11 @@ bool Camera::GetWorldPositionFromViewport(int x, int y, glm::ivec3 *outPosition)
 	return true;
 }
 
+void Camera::Update()
+{
+	this->UpdateZoom();
+}
+
 void Camera::RotateLeft()
 {
 	SetRotation(wraprange(0.0f, this->rotation + RotationSpeed, 360.0f));
@@ -175,4 +181,36 @@ void Camera::SetZoom(float value)
 {
 	this->zoom = value;
 	UpdateEye();
+}
+
+void Camera::UpdateZoom()
+{
+	if (this->zoom == this->targetZoom) {
+		this->zoomSpeed = 0;
+		return;
+	}
+
+	const float minZoomSpeed = 8.0f;
+
+	this->zoomSpeed = max(minZoomSpeed, this->zoomSpeed - max(1.0f, this->zoomSpeed / 64));
+	if (this->zoom < this->targetZoom)
+		SetZoom(min(this->zoom + this->zoomSpeed, this->targetZoom));
+	else if (this->zoom > this->targetZoom)
+		SetZoom(max(this->zoom - this->zoomSpeed, this->targetZoom));
+}
+
+void Camera::ZoomIn()
+{
+	if (this->targetZoom > 768.0f) {
+		this->targetZoom = max(768.0f, this->targetZoom - 512.0f);
+		this->zoomSpeed = min(96.0f, this->zoomSpeed + 42.0f);
+	}
+}
+
+void Camera::ZoomOut()
+{
+	if (this->targetZoom < 2560.0f) {
+		this->targetZoom = min(2560.0f, this->targetZoom + 512.0f);
+		this->zoomSpeed = min(96.0f, this->zoomSpeed + 42.0f);
+	}
 }

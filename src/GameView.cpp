@@ -30,8 +30,16 @@ void GameView::Update()
 	}
 
 	this->world.Update();
+	this->camera.Update();
 
 	// Input
+	if (gIsKeyDown[SDLK_f]) {
+		this->landscapeRenderer.debugRenderType++;
+		if (this->landscapeRenderer.debugRenderType > DEBUG_LANDSCAPE_RENDER_TYPE_POINTS)
+			this->landscapeRenderer.debugRenderType = DEBUG_LANDSCAPE_RENDER_TYPE_NONE;
+		this->objectRenderer.debugRenderType = this->landscapeRenderer.debugRenderType;
+	}
+
 	if (gIsScanKeyDown[SDL_SCANCODE_UP] || gIsKeyDown[SDLK_w])
 		this->camera.MoveForwards();
 	if (gIsScanKeyDown[SDL_SCANCODE_DOWN] || gIsKeyDown[SDLK_s])
@@ -41,8 +49,10 @@ void GameView::Update()
 	if (gIsScanKeyDown[SDL_SCANCODE_RIGHT] || gIsKeyDown[SDLK_d])
 		this->camera.RotateRight();
 
-	if (gCursor.wheel != 0)
-		this->camera.SetZoom(this->camera.zoom + (gCursor.wheel * 32));
+	if (gCursor.wheel < 0)
+		this->camera.ZoomOut();
+	else if (gCursor.wheel > 0)
+		this->camera.ZoomIn();
 
 	if (gCursorPress.button & SDL_BUTTON_RMASK) {
 		for (Unit *unit : this->world.selectedUnits)

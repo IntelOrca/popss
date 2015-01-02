@@ -17,6 +17,8 @@ public:
 	float fov;
 	float rotation;
 	float zoom;
+	float targetZoom;
+	float zoomSpeed;
 	glm::vec3 target;
 
 	glm::vec3 eye;
@@ -29,6 +31,8 @@ public:
 
 	bool GetWorldPositionFromViewport(int x, int y, glm::ivec3 *outPosition) const;
 
+	void Update();
+
 	void RotateLeft();
 	void RotateRight();
 	void MoveForwards();
@@ -36,6 +40,10 @@ public:
 
 	void SetRotation(float value);
 	void SetZoom(float value);
+
+	void UpdateZoom();
+	void ZoomIn();
+	void ZoomOut();
 
 private:
 	void UpdateEye();

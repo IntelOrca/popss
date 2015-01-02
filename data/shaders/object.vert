@@ -16,7 +16,9 @@ uniform LightSource InputLightSources[8];
 
 in vec3 VertexPosition;
 in vec3 VertexNormal;
+in vec2 VertexTextureCoords;
 
+out vec2 FragmentTextureCoords;
 out vec3 FragmentLighting;
 out float FragmentFog;
 
@@ -24,6 +26,8 @@ void main()
 {
 	vec3 modelVertexPosition = (ModelMatrix * vec4(VertexPosition, 1.0)).xyz;
 	vec3 distortedVertexPosition = SphereDistort(modelVertexPosition, InputCameraTarget, InputSphereRatio);
+
+	FragmentTextureCoords = VertexTextureCoords;
 
 	// Calculate fragment lighting
 	vec3 totalLighting = vec3(0.0);
@@ -39,7 +43,7 @@ void main()
 	FragmentLighting = totalLighting;
 
 	// Calculate fragment fog
-	FragmentFog = GetFogFactor(modelVertexPosition, 256 * 4, 256 * 32);
+	FragmentFog = GetFogFactor(modelVertexPosition, InputCameraTarget, 256 * 4, 256 * 32);
 
     gl_Position = ProjectionMatrix * ViewMatrix * vec4(distortedVertexPosition, 1.0);
 }

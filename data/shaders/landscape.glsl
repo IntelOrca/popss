@@ -10,9 +10,10 @@ vec3 SphereDistort(in vec3 position, in vec3 cameraTarget, in float ratio)
 	);
 }
 
-float GetFogFactor(in vec3 position, in float minDistance, in float maxDistance)
+float GetFogFactor(in vec3 position, in vec3 cameraTarget, in float minDistance, in float maxDistance)
 {
-	float distance = sqrt(position.x * position.x + position.z * position.z);
+	vec3 relative = position - cameraTarget;
+	float distance = sqrt(relative.x * relative.x + relative.z * relative.z);
 	if (distance > minDistance)
 		return clamp((distance - minDistance) / maxDistance, 0.0, 1.0);
 	else

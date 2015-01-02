@@ -47,7 +47,7 @@ void main()
 	FragmentLighting = totalLighting;
 
 	// Calculate fragment fog
-	FragmentFog = GetFogFactor(VertexPosition, 256 * 8, 256 * 16);
+	FragmentFog = GetFogFactor(VertexPosition, InputCameraTarget, 256 * 8, 256 * 16);
 
 	// Position
 	gl_Position = ProjectionMatrix * ModelViewMatrix * vec4(newVertexPosition, 1.0);
