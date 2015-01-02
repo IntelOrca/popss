@@ -20,6 +20,15 @@
     <ClCompile Include="..\src\util\MathExtensions.cpp">
       <Filter>Util</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\Pathfinding.cpp" />
+    <ClCompile Include="..\src\Objects\Buildings\VaultOfKnowledge.cpp">
+      <Filter>Objects\Buildings</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Objects\Buildings\Building.cpp">
+      <Filter>Objects\Buildings</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Mesh.cpp" />
+    <ClCompile Include="..\src\ObjectRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Audio.h" />
@@ -39,6 +48,15 @@
     <ClInclude Include="..\src\LightSource.h" />
     <ClInclude Include="..\src\WorldObject.h" />
     <ClInclude Include="..\src\Unit.h" />
+    <ClInclude Include="..\src\Pathfinding.h" />
+    <ClInclude Include="..\src\Objects\Buildings\VaultOfKnowledge.h">
+      <Filter>Objects\Buildings</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Objects\Buildings\Building.h">
+      <Filter>Objects\Buildings</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Mesh.h" />
+    <ClInclude Include="..\src\ObjectRenderer.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Util">
@@ -61,6 +79,12 @@
     </Filter>
     <Filter Include="Libraries">
       <UniqueIdentifier>{79a4d24e-1f20-4a47-9b5d-ad91320373d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects">
+      <UniqueIdentifier>{2ae0cac3-b9c7-4e41-bffd-0b7a8cfaeaf6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\Buildings">
+      <UniqueIdentifier>{0436b570-8b78-4e28-bbef-479e66570a10}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -221,6 +221,8 @@ int World::CalculateTerrain(int landX, int landZ) const
 	return 255;
 }
 
+#include "Objects/Buildings/VaultOfKnowledge.h"
+
 void World::LoadLandFromPOPTB(const char *path)
 {
 	unsigned short *heightMap = new unsigned short[128 * 128];
@@ -230,6 +232,20 @@ void World::LoadLandFromPOPTB(const char *path)
 		exit(-1);
 
 	fread(heightMap, 128 * 128 * 2, 1, file);
+	fseek(file, 0x14043, SEEK_SET);
+	for (int i = 0; i < 2000; i++) {
+		unsigned char objdata[55];
+		fread(objdata, sizeof(objdata), 1, file);
+
+		if (objdata[0] == 18 && objdata[1] == 2) {
+			VaultOfKnowledge *vok = new VaultOfKnowledge();
+			vok->ownership = objdata[2];
+			vok->x = objdata[4] * World::TileSize;
+			vok->z = objdata[6] * World::TileSize;
+			vok->rotation = objdata[8] * 32;
+			this->objects.push_back(vok);
+		}
+	}
 	fclose(file);
 
 	this->size = 256;

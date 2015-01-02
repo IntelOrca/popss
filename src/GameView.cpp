@@ -10,6 +10,7 @@ GameView::GameView()
 {
 	this->camera.world = &this->world;
 	this->landscapeRenderer.world = &this->world;
+	this->objectRenderer.world = &this->world;
 
 	this->world.LoadLandFromPOPTB("data/maps/levl2011.dat");
 
@@ -25,6 +26,7 @@ void GameView::Update()
 {
 	if (updateCounter == 0) {
 		this->landscapeRenderer.Initialise();
+		this->objectRenderer.Initialise();
 	}
 
 	this->world.Update();
@@ -92,6 +94,7 @@ void GameView::Update()
 void GameView::Draw()
 {
 	this->landscapeRenderer.Render(&this->camera);
+	this->objectRenderer.Render(&this->camera);
 
 	this->camera.viewHasChanged = false;
 }

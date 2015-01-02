@@ -2,6 +2,7 @@
 
 #include "Camera.h"
 #include "LandscapeRenderer.h"
+#include "ObjectRenderer.h"
 #include "PopSS.h"
 #include "World.h"
 
@@ -22,6 +23,7 @@ private:
 	int updateCounter;
 
 	LandscapeRenderer landscapeRenderer;
+	ObjectRenderer objectRenderer;
 };
 
 extern GameView *gGameView;

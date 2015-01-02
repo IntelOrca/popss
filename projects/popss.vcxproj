@@ -24,7 +24,12 @@
     <ClCompile Include="..\src\Camera.cpp" />
     <ClCompile Include="..\src\GameView.cpp" />
     <ClCompile Include="..\src\LandscapeRenderer.cpp" />
+    <ClCompile Include="..\src\Mesh.cpp" />
+    <ClCompile Include="..\src\ObjectRenderer.cpp" />
+    <ClCompile Include="..\src\Objects\Buildings\Building.cpp" />
+    <ClCompile Include="..\src\Objects\Buildings\VaultOfKnowledge.cpp" />
     <ClCompile Include="..\src\OrcaShader.cpp" />
+    <ClCompile Include="..\src\Pathfinding.cpp" />
     <ClCompile Include="..\src\PopSS.cpp" />
     <ClCompile Include="..\src\TerrainStyle.cpp" />
     <ClCompile Include="..\src\Unit.cpp" />
@@ -38,7 +43,12 @@
     <ClInclude Include="..\src\GameView.h" />
     <ClInclude Include="..\src\LandscapeRenderer.h" />
     <ClInclude Include="..\src\LightSource.h" />
+    <ClInclude Include="..\src\Mesh.h" />
+    <ClInclude Include="..\src\ObjectRenderer.h" />
+    <ClInclude Include="..\src\Objects\Buildings\Building.h" />
+    <ClInclude Include="..\src\Objects\Buildings\VaultOfKnowledge.h" />
     <ClInclude Include="..\src\OrcaShader.h" />
+    <ClInclude Include="..\src\Pathfinding.h" />
     <ClInclude Include="..\src\PopSS.h" />
     <ClInclude Include="..\src\TerrainStyle.h" />
     <ClInclude Include="..\src\Unit.h" />
