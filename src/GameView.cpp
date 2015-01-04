@@ -33,20 +33,20 @@ void GameView::Update()
 	this->camera.Update();
 
 	// Input
-	if (gIsKeyDown[SDLK_f]) {
+	if (gIsKey[SDLK_f] & KEY_PRESSED) {
 		this->landscapeRenderer.debugRenderType++;
 		if (this->landscapeRenderer.debugRenderType > DEBUG_LANDSCAPE_RENDER_TYPE_POINTS)
 			this->landscapeRenderer.debugRenderType = DEBUG_LANDSCAPE_RENDER_TYPE_NONE;
 		this->objectRenderer.debugRenderType = this->landscapeRenderer.debugRenderType;
 	}
 
-	if (gIsScanKeyDown[SDL_SCANCODE_UP] || gIsKeyDown[SDLK_w])
+	if ((gIsScanKey[SDL_SCANCODE_UP] & KEY_DOWN) || (gIsKey[SDLK_w] & KEY_DOWN))
 		this->camera.MoveForwards();
-	if (gIsScanKeyDown[SDL_SCANCODE_DOWN] || gIsKeyDown[SDLK_s])
+	if ((gIsScanKey[SDL_SCANCODE_DOWN] & KEY_DOWN) || (gIsKey[SDLK_s] & KEY_DOWN))
 		this->camera.MoveBackwards();
-	if (gIsScanKeyDown[SDL_SCANCODE_LEFT] || gIsKeyDown[SDLK_a])
+	if ((gIsScanKey[SDL_SCANCODE_LEFT] & KEY_DOWN) || (gIsKey[SDLK_a] & KEY_DOWN))
 		this->camera.RotateLeft();
-	if (gIsScanKeyDown[SDL_SCANCODE_RIGHT] || gIsKeyDown[SDLK_d])
+	if ((gIsScanKey[SDL_SCANCODE_RIGHT] & KEY_DOWN) || (gIsKey[SDLK_d] & KEY_DOWN))
 		this->camera.RotateRight();
 
 	if (gCursor.wheel < 0)

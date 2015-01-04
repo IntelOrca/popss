@@ -241,48 +241,76 @@ void World::LoadLandFromPOPTB(const char *path)
 			VaultOfKnowledge *vok = new VaultOfKnowledge();
 			vok->ownership = objdata[2];
 			vok->x = objdata[4] * World::TileSize;
-			vok->z = objdata[6] * World::TileSize;
+			vok->z = (255 - objdata[6]) * World::TileSize;
 			vok->rotation = objdata[8] * 32;
 			this->objects.push_back(vok);
 		}
 	}
 	fclose(file);
 
+	for (int z = 0; z < 64; z++) {
+		for (int x = 0; x < 128; x++) {
+			int tmp = heightMap[x + (z * 128)];
+			heightMap[x + (z * 128)] = heightMap[x + ((127 - z) * 128)];
+			heightMap[x + ((127 - z) * 128)] = tmp;
+		}
+	}
+
 	this->size = 256;
-	this->tiles = new WorldTile[256 * 256];
-	for (int z = 0; z < 256; z++) {
-		for (int x = 0; x < 256; x++) {
-			if (x % 2 == 0 && z % 2 == 0) {
-				this->GetTile(x, z)->height = heightMap[(x / 2) + ((z / 2) * 128)];
-			} else if (x % 2 != 0 && z % 2 == 0) {
-				int hmx = (x / 2);
-				int hmz = (z / 2);
-				int height = heightMap[(hmx % 128) + ((hmz % 128) * 128)] + heightMap[((hmx + 1) % 128) + ((hmz % 128) * 128)];
-				this->GetTile(x, z)->height = height / 2;
-			} else if (x % 2 == 0 && z % 2 != 0) {
-				int hmx = (x / 2);
-				int hmz = (z / 2);
-				int height = heightMap[(hmx % 128) + ((hmz % 128) * 128)] + heightMap[(hmx % 128) + (((hmz + 1) % 128) * 128)];
-				this->GetTile(x, z)->height = height / 2;
-			} else {
-				this->GetTile(x, z)->height = 0;
-			}
+	this->tiles = new WorldTile[this->size * this->size];
+	for (int j = 0; j < this->size; j++) {
+		for (int i = 0; i < this->size; i++) {
+			double u = i / (double)this->size;
+			double v = j / (double)this->size;
+			u = u * 128 - 0.5;
+			v = v * 128 - 0.5;
+			int x = floor(u);
+			int y = floor(v);
+			double u_ratio = u - x;
+			double v_ratio = v - y;
+			double u_opposite = 1 - u_ratio;
+			double v_opposite = 1 - v_ratio;
+
+			int x0 = (x + 128) % 128;
+			int y0 = (y + 128) % 128;
+			int x1 = ((x + 1) + 128) % 128;
+			int y1 = ((y + 1) + 128) % 128;
+			double result = (heightMap[x0 + (y0 * 128)] * u_opposite + heightMap[x1 + (y0 * 128)] * u_ratio) * v_opposite + 
+							(heightMap[x0 + (y1 * 128)] * u_opposite + heightMap[x1 + (y1 * 128)] * u_ratio) * v_ratio;
+			
+			this->GetTile(i, j)->height = (int)result;
+
+			// if (x % 2 == 0 && z % 2 == 0) {
+			// 	this->GetTile(x, z)->height = heightMap[(x / 2) + ((z / 2) * 128)];
+			// } else if (x % 2 != 0 && z % 2 == 0) {
+			// 	int hmx = (x / 2);
+			// 	int hmz = (z / 2);
+			// 	int height = heightMap[(hmx % 128) + ((hmz % 128) * 128)] + heightMap[((hmx + 1) % 128) + ((hmz % 128) * 128)];
+			// 	this->GetTile(x, z)->height = height / 2;
+			// } else if (x % 2 == 0 && z % 2 != 0) {
+			// 	int hmx = (x / 2);
+			// 	int hmz = (z / 2);
+			// 	int height = heightMap[(hmx % 128) + ((hmz % 128) * 128)] + heightMap[(hmx % 128) + (((hmz + 1) % 128) * 128)];
+			// 	this->GetTile(x, z)->height = height / 2;
+			// } else {
+			// 	this->GetTile(x, z)->height = 0;
+			// }
 		}
 	}
 
 	delete[] heightMap;
 
-	for (int z = 0; z < 256; z++) {
-		for (int x = 0; x < 256; x++) {
-			if (x % 2 != 0 && z % 2 != 0) {
-				int height = 0;
-				for (int zz = -1; zz <= 1; zz++)
-					for (int xx = -1; xx <= 1; xx++)
-						height += this->GetTile(x + xx, z + zz)->height;
-				this->GetTile(x, z)->height = height / 8;
-			}
-		}
-	}
+	// for (int z = 0; z < 256; z++) {
+	// 	for (int x = 0; x < 256; x++) {
+	// 		if (x % 2 != 0 && z % 2 != 0) {
+	// 			int height = 0;
+	// 			for (int zz = -1; zz <= 1; zz++)
+	// 				for (int xx = -1; xx <= 1; xx++)
+	// 					height += this->GetTile(x + xx, z + zz)->height;
+	// 			this->GetTile(x, z)->height = height / 8;
+	// 		}
+	// 	}
+	// }
 
 	this->Reprocess();
 }

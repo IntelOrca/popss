@@ -144,6 +144,15 @@
     <None Include="..\data\objects\vok.obj">
       <Filter>data\objects</Filter>
     </None>
+    <None Include="..\data\shaders\land.geom">
+      <Filter>data\shaders</Filter>
+    </None>
+    <None Include="..\data\shaders\fog.vert">
+      <Filter>data\shaders</Filter>
+    </None>
+    <None Include="..\data\shaders\fog.frag">
+      <Filter>data\shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\data\textures\blade.png">

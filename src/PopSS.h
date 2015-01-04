@@ -84,8 +84,14 @@ typedef trect<int> irect;
 extern SDL_Window *glWindow;
 extern SDL_GLContext gglContext;
 
-extern bool gIsScanKeyDown[];
-extern bool gIsKeyDown[];
+enum {
+	KEY_PRESSED = (1 << 0),
+	KEY_DOWN = (1 << 1),
+	KEY_RELEASED = (1 << 2)
+};
+
+extern unsigned char gIsScanKey[];
+extern unsigned char gIsKey[];
 
 struct cursor {
 	int x, y, button, wheel;

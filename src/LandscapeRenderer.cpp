@@ -32,6 +32,11 @@ const VertexAttribPointerInfo WaterShaderVertexInfo[] = {
 	{ NULL }
 };
 
+const VertexAttribPointerInfo FogShaderVertexInfo[] = {
+	{ "VertexPosition",			GL_FLOAT,			4,	offsetof(FogVertex, position)		},
+	{ NULL }
+};
+
 bool LoadTexture(GLuint texture, const char *path)
 {
 	GLubyte* bits;
@@ -58,7 +63,7 @@ LandscapeRenderer::LandscapeRenderer()
 {
 	this->debugRenderType = DEBUG_LANDSCAPE_RENDER_TYPE_NONE;
 
-	this->landViewSize = 76;
+	this->landViewSize = 128;
 	this->oceanViewSize = 52;
 
 	this->time = 0;
@@ -71,6 +76,13 @@ LandscapeRenderer::~LandscapeRenderer()
 
 void LandscapeRenderer::Initialise()
 {
+	this->fogShader = OrcaShader::FromPath("fog.vert", "fog.frag");
+	glGenBuffers(1, &this->fogVBO);
+	glGenVertexArrays(1, &this->fogVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, this->fogVBO);
+	glBindVertexArray(this->fogVAO);
+	this->fogShader->SetVertexAttribPointer(sizeof(FogVertex), FogShaderVertexInfo);
+
 	this->landShader = OrcaShader::FromPath("land.vert", "land.frag");
 	this->landShaderUniform.projectionMatrix = this->landShader->GetUniformLocation("ProjectionMatrix");
 	this->landShaderUniform.modelViewMatrix = this->landShader->GetUniformLocation("ModelViewMatrix");
@@ -121,6 +133,8 @@ void LandscapeRenderer::Initialise()
 
 void LandscapeRenderer::Render(const Camera *camera)
 {
+	RenderSky(camera);
+
 	// Get the camera view matrix
 	this->projectionMatrix = camera->Get3dProjectionMatrix();
 	this->modelViewMatrix = camera->Get3dViewMatrix();
@@ -152,7 +166,10 @@ void LandscapeRenderer::Render(const Camera *camera)
 	if (this->debugRenderType != DEBUG_LANDSCAPE_RENDER_TYPE_NONE)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-	this->RenderObjects(camera);	
+	this->RenderObjects(camera);
+
+	if (this->debugRenderType != DEBUG_LANDSCAPE_RENDER_TYPE_NONE)
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	this->time++;
 }
@@ -266,20 +283,90 @@ void LandscapeRenderer::RenderLandQuad(int landX, int landZ, float x, float z)
 	WorldTile *tile10 = this->world->GetTile(landX + 1, landZ + 0);
 	WorldTile *tile11 = this->world->GetTile(landX + 1, landZ + 1);
 
-	int totalHeightA = tile00->height + tile01->height + tile11->height;
-	int totalHeightB = tile00->height + tile11->height + tile10->height;
+	// \--/
+	// |\/|
+	// |/\|
+	// /--\
 
-	if (totalHeightA > 0)
-		RenderLandTriangle000111(x, z, landX, landZ);
-	if (totalHeightB > 0)
-		RenderLandTriangle001110(x, z, landX, landZ);
+	int totalLandPoints =
+		(tile00->height > 0 ? 1 : 0) +
+		(tile01->height > 0 ? 1 : 0) +
+		(tile10->height > 0 ? 1 : 0) +
+		(tile11->height > 0 ? 1 : 0);
+	
+	bool dothem[4] = { false };
+	if (totalLandPoints >= 2)
+		dothem[0] = dothem[1] = dothem[2] = dothem[3] = true;
+
+	if (tile00->height > 0) {
+		dothem[0] = true;
+		dothem[1] = true;
+	}
+	if (tile01->height > 0) {
+		dothem[1] = true;
+		dothem[2] = true;
+	}
+	if (tile10->height > 0) {
+		dothem[0] = true;
+		dothem[3] = true;
+	}
+	if (tile11->height > 0) {
+		dothem[2] = true;
+		dothem[3] = true;
+	}
+
+
+	if (dothem[0]) {
+		float offsetsX[3] = { 0, 0.5, 1 };
+		float offsetsZ[3] = { 0, 0.5, 0 };
+		RenderLandTriangle(x, z, landX, landZ, offsetsX, offsetsZ);
+	}
+
+	if (dothem[1]) {
+		float offsetsX[3] = { 0, 0, 0.5 };
+		float offsetsZ[3] = { 0, 1, 0.5 };
+		RenderLandTriangle(x, z, landX, landZ, offsetsX, offsetsZ);
+	}
+
+	if (dothem[2]) {
+		float offsetsX[3] = { 0, 1, 0.5 };
+		float offsetsZ[3] = { 1, 1, 0.5 };
+		RenderLandTriangle(x, z, landX, landZ, offsetsX, offsetsZ);
+	}
+
+	if (dothem[3]) {
+		float offsetsX[3] = { 1, 1, 0.5 };
+		float offsetsZ[3] = { 1, 0, 0.5 };
+		RenderLandTriangle(x, z, landX, landZ, offsetsX, offsetsZ);
+	}
+
+
+
+	// int totalHeightA = tile00->height + tile01->height + tile11->height;
+	// int totalHeightB = tile00->height + tile11->height + tile10->height;
+	// 
+	// if (totalHeightA > 0)
+	// 	RenderLandTriangle000111(x, z, landX, landZ);
+	// if (totalHeightB > 0)
+	// 	RenderLandTriangle001110(x, z, landX, landZ);
+}
+
+void LandscapeRenderer::RenderLandTriangle(float x, float z, int landX, int landZ, const float *offsetsX, const float *offsetsZ)
+{
+	// Calculate UV coordinates
+	glm::vec2 baseUV = GetTextureUV(landX, landZ);
+	glm::vec2 uv[3];
+	for (int i = 0; i < 3; i++)
+		uv[i] = glm::vec2(baseUV.s + TextureMapSize * offsetsX[i], baseUV.t + TextureMapSize * offsetsZ[i]);
+
+	this->RenderLandTriangle(x, z, landX, landZ, offsetsX, offsetsZ, uv);
 }
 
 void LandscapeRenderer::RenderLandTriangle000111(float vx, float vz, int landX, int landZ)
 {
 	// Offset indicies
-	int offsetsX[3] = { 0, 0, 1 };
-	int offsetsZ[3] = { 0, 1, 1 };
+	float offsetsX[3] = { 0, 0, 1 };
+	float offsetsZ[3] = { 0, 1, 1 };
 
 	// Calculate UV coordinates
 	glm::vec2 baseUV = GetTextureUV(landX, landZ);
@@ -295,8 +382,8 @@ void LandscapeRenderer::RenderLandTriangle000111(float vx, float vz, int landX, 
 void LandscapeRenderer::RenderLandTriangle001110(float vx, float vz, int landX, int landZ)
 {
 	// Offset indicies
-	int offsetsX[3] = { 0, 1, 1 };
-	int offsetsZ[3] = { 0, 1, 0 };
+	float offsetsX[3] = { 0, 1, 1 };
+	float offsetsZ[3] = { 0, 1, 0 };
 
 	// Calculate UV coordinates
 	glm::vec2 baseUV = GetTextureUV(landX, landZ);
@@ -309,12 +396,28 @@ void LandscapeRenderer::RenderLandTriangle001110(float vx, float vz, int landX, 
 	RenderLandTriangle(vx, vz, landX, landZ, offsetsX, offsetsZ, uv);
 }
 
-void LandscapeRenderer::RenderLandTriangle(float vx, float vz, int landX, int landZ, const int *offsetsX, const int *offsetsZ, const glm::vec2 *uv)
+void LandscapeRenderer::RenderLandTriangle(float vx, float vz, int landX, int landZ, const float *offsetsX, const float *offsetsZ, const glm::vec2 *uv)
 {
 	for (int i = 0; i < 3; i++) {
 		const WorldTile *tile = this->world->GetTile(landX + offsetsX[i], landZ + offsetsZ[i]);
+		int height = tile->height;
+
+		if (offsetsX[i] == 0.5f && offsetsZ[i] == 0.5f) {
+			int heights[4] = {
+				this->world->GetTile(landX + 0, landZ + 0)->height,
+				this->world->GetTile(landX + 0, landZ + 1)->height,
+				this->world->GetTile(landX + 1, landZ + 1)->height,
+				this->world->GetTile(landX + 1, landZ + 0)->height
+			};
+
+			if (heights[0] == 0 || heights[1] == 0 || heights[2] == 0 || heights[3] == 0)
+				height = 0;
+			else
+				height = (heights[0] + heights[1] + heights[2] + heights[3]) / 4;
+		}
+
 		this->AddVertex(
-			glm::vec3(vx + (offsetsX[i] * World::TileSize), tile->height, vz + (offsetsZ[i] * World::TileSize)),
+			glm::vec3(vx + (offsetsX[i] * World::TileSize), height, vz + (offsetsZ[i] * World::TileSize)),
 			uv[i],
 			tile
 		);
@@ -541,4 +644,32 @@ void LandscapeRenderer::RenderObjects(const Camera *camera)
 	for (WorldObject *worldObject : this->world->objects) {
 		worldObject->Draw();
 	}
+}
+
+void LandscapeRenderer::RenderSky(const Camera *camera)
+{
+	glDisable(GL_DEPTH_TEST);
+
+	glm::vec4 points[4] = {
+		{ -1.0, +1.0, 1.0, 1.0 },
+		{ -1.0, -1.0, 1.0, 1.0 },
+		{ +1.0, -1.0, 1.0, 1.0 },
+		{ +1.0, +1.0, 1.0, 1.0 }
+	};
+
+	this->fogVertices.clear();
+	this->fogVertices.push_back({ points[0] });
+	this->fogVertices.push_back({ points[1] });
+	this->fogVertices.push_back({ points[2] });
+	this->fogVertices.push_back({ points[0] });
+	this->fogVertices.push_back({ points[2] });
+	this->fogVertices.push_back({ points[3] });
+
+	glBindBuffer(GL_ARRAY_BUFFER, this->fogVBO);
+	glBufferData(GL_ARRAY_BUFFER, this->fogVertices.size() * sizeof(FogVertex), this->fogVertices.data(), GL_STATIC_DRAW);
+
+	this->fogShader->Use();
+
+	glBindVertexArray(this->fogVAO);
+	glDrawArrays(GL_TRIANGLES, 0, this->fogVertices.size());
 }

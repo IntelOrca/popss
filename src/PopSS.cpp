@@ -4,8 +4,8 @@
 
 SDL_Window *glWindow;
 SDL_GLContext gglContext;
-bool gIsScanKeyDown[256] = { 0 };
-bool gIsKeyDown[256] = { 0 };
+unsigned char gIsScanKey[256] = { 0 };
+unsigned char gIsKey[256] = { 0 };
 
 cursor gCursor;
 cursor gCursorPress;
@@ -74,6 +74,11 @@ void handle_events()
 	gCursorPress.button = 0;
 	gCursorRelease.button = 0;
 
+	for (int i = 0; i < countof(gIsScanKey); i++)
+		gIsScanKey[i] &= ~(KEY_PRESSED | KEY_RELEASED);
+	for (int i = 0; i < countof(gIsKey); i++)
+		gIsKey[i] &= ~(KEY_PRESSED | KEY_RELEASED);
+
 	while (SDL_PollEvent(&event)) {
 		switch (event.type) {
 			case SDL_KEYDOWN:
@@ -89,10 +94,12 @@ void handle_events()
 					_updateStep = 8;
 					break;
 				}
-				if (event.key.keysym.scancode < countof(gIsScanKeyDown))
-					gIsScanKeyDown[event.key.keysym.scancode] = true;
-				if (event.key.keysym.sym < countof(gIsKeyDown))
-					gIsKeyDown[event.key.keysym.sym] = true;
+				if (event.key.repeat == 0) {
+					if (event.key.keysym.scancode < countof(gIsScanKey))
+						gIsScanKey[event.key.keysym.scancode] |= KEY_PRESSED | KEY_DOWN;
+					if (event.key.keysym.sym < countof(gIsKey))
+						gIsKey[event.key.keysym.sym] |= KEY_PRESSED | KEY_DOWN;
+				}
 				break;
 			case SDL_KEYUP:
 				switch (event.key.keysym.sym) {
@@ -100,10 +107,16 @@ void handle_events()
 					_updateStep = 1;
 					break;
 				}
-				if (event.key.keysym.scancode < countof(gIsScanKeyDown))
-					gIsScanKeyDown[event.key.keysym.scancode] = false;
-				if (event.key.keysym.sym < countof(gIsKeyDown))
-					gIsKeyDown[event.key.keysym.sym] = false;
+				if (event.key.repeat == 0) {
+					if (event.key.keysym.scancode < countof(gIsScanKey)) {
+						gIsScanKey[event.key.keysym.scancode] |= KEY_RELEASED;
+						gIsScanKey[event.key.keysym.scancode] &= ~KEY_DOWN;
+					}
+					if (event.key.keysym.sym < countof(gIsKey)) {
+						gIsKey[event.key.keysym.sym] |= KEY_RELEASED;
+						gIsKey[event.key.keysym.sym] &= ~KEY_DOWN;
+					}
+				}
 				break;
 			case SDL_WINDOWEVENT:
 				if (event.window.event == SDL_WINDOWEVENT_RESIZED)
@@ -142,7 +155,7 @@ void update()
 
 void draw()
 {
-	glClearColor(0, 0, 0, 1);
+	glClearColor(0, 0, 0, 0);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	_gameView->Draw();

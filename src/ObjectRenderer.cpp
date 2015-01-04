@@ -100,6 +100,9 @@ void ObjectRenderer::Render(const Camera *camera)
 			RenderVertices();
 		}
 	}
+
+	if (this->debugRenderType != DEBUG_LANDSCAPE_RENDER_TYPE_NONE)
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 void ObjectRenderer::PrepareMesh(const Mesh *mesh)

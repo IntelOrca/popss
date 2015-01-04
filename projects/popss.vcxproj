@@ -69,7 +69,10 @@
     <None Include="..\data\maps\levl2011.dat" />
     <None Include="..\data\shaders\flat_object.frag" />
     <None Include="..\data\shaders\flat_object.vert" />
+    <None Include="..\data\shaders\fog.frag" />
+    <None Include="..\data\shaders\fog.vert" />
     <None Include="..\data\shaders\land.frag" />
+    <None Include="..\data\shaders\land.geom" />
     <None Include="..\data\shaders\land.vert" />
     <None Include="..\data\shaders\landscape.glsl" />
     <None Include="..\data\shaders\lighting.glsl" />
@@ -205,6 +208,7 @@
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -212,7 +216,8 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>sdl2.lib;sdl2main.lib;opengl32.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
-      <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
+      <IgnoreAllDefaultLibraries>
+      </IgnoreAllDefaultLibraries>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /Y /E "$(ProjectDir)\..\data\*.*" "$(TargetDir)\data\"</Command>
@@ -226,6 +231,7 @@
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

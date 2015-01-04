@@ -20,6 +20,10 @@ struct WaterVertex {
 	glm::vec2 texcoords;
 };
 
+struct FogVertex {
+	glm::vec4 position;
+};
+
 enum DEBUG_LANDSCAPE_RENDER_TYPE {
 	DEBUG_LANDSCAPE_RENDER_TYPE_NONE,
 	DEBUG_LANDSCAPE_RENDER_TYPE_WIREFRAME,
@@ -80,13 +84,19 @@ private:
 	GLuint terrainTextures[8];
 	GLuint waterTexture;
 
+	OrcaShader *fogShader;
+	GLuint fogVAO;
+	GLuint fogVBO;
+	std::vector<FogVertex> fogVertices;
+
 	void RenderArea(const Camera *camera, int viewSize, bool water);
 
 	void RenderLand(const Camera *camera);
 	void RenderLandQuad(int landX, int landZ, float x, float z);
+	void RenderLandTriangle(float x, float z, int landX, int landZ, const float *offsetsX, const float *offsetsZ);
 	void RenderLandTriangle000111(float vx, float vz, int landX, int landZ);
 	void RenderLandTriangle001110(float vx, float vz, int landX, int landZ);
-	void RenderLandTriangle(float vx, float vz, int landX, int landZ, const int *offsetsX, const int *offsetsZ, const glm::vec2 *uv);
+	void RenderLandTriangle(float vx, float vz, int landX, int landZ, const float *offsetsX, const float *offsetsZ, const glm::vec2 *uv);
 
 	void RenderOcean(const Camera *camera);
 	void RenderOceanQuad(int landX, int landZ, float vx, float vz);
@@ -103,6 +113,8 @@ private:
 	glm::vec4 GetColourFromLand(int height);
 
 	void SetLightSources(const Camera *camera, OrcaShader *shader);
+
+	void RenderSky(const Camera *camera);
 };
 
 } }
