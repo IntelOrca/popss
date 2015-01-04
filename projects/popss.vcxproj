@@ -72,7 +72,6 @@
     <None Include="..\data\shaders\fog.frag" />
     <None Include="..\data\shaders\fog.vert" />
     <None Include="..\data\shaders\land.frag" />
-    <None Include="..\data\shaders\land.geom" />
     <None Include="..\data\shaders\land.vert" />
     <None Include="..\data\shaders\landscape.glsl" />
     <None Include="..\data\shaders\lighting.glsl" />
@@ -81,7 +80,6 @@
     <None Include="..\data\shaders\sky.frag" />
     <None Include="..\data\shaders\sky.vert" />
     <None Include="..\data\shaders\water.frag" />
-    <None Include="..\data\shaders\water.geom" />
     <None Include="..\data\shaders\water.vert" />
   </ItemGroup>
   <ItemGroup>

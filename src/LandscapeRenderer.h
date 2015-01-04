@@ -94,11 +94,10 @@ private:
 	void RenderLand(const Camera *camera);
 	void RenderLandQuad(int landX, int landZ, float x, float z);
 	void RenderLandTriangle(float x, float z, int landX, int landZ, const float *offsetsX, const float *offsetsZ);
-	void RenderLandTriangle000111(float vx, float vz, int landX, int landZ);
-	void RenderLandTriangle001110(float vx, float vz, int landX, int landZ);
-	void RenderLandTriangle(float vx, float vz, int landX, int landZ, const float *offsetsX, const float *offsetsZ, const glm::vec2 *uv);
 
 	void RenderOcean(const Camera *camera);
+	void RenderOceanPrimitives(const Camera *camera);
+
 	void RenderOceanQuad(int landX, int landZ, float vx, float vz);
 	void RenderOceanTriangle000111(float vx, float vz, int oceanX, int oceanZ);
 	void RenderOceanTriangle001110(float vx, float vz, int oceanX, int oceanZ);

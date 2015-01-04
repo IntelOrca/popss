@@ -107,6 +107,7 @@ GLuint OrcaShader::LoadShader(GLenum type, const char *path)
 		glGetShaderInfoLog(shader, sizeof(buffer), NULL, buffer);
 		glDeleteShader(shader);
 		fprintf(stderr, buffer);
+		MessageBox(NULL, buffer, "Unable to compile shader", MB_OK);
 		return 0;
 	}
 

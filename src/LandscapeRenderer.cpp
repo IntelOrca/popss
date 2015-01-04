@@ -339,16 +339,6 @@ void LandscapeRenderer::RenderLandQuad(int landX, int landZ, float x, float z)
 		float offsetsZ[3] = { 1, 0, 0.5 };
 		RenderLandTriangle(x, z, landX, landZ, offsetsX, offsetsZ);
 	}
-
-
-
-	// int totalHeightA = tile00->height + tile01->height + tile11->height;
-	// int totalHeightB = tile00->height + tile11->height + tile10->height;
-	// 
-	// if (totalHeightA > 0)
-	// 	RenderLandTriangle000111(x, z, landX, landZ);
-	// if (totalHeightB > 0)
-	// 	RenderLandTriangle001110(x, z, landX, landZ);
 }
 
 void LandscapeRenderer::RenderLandTriangle(float x, float z, int landX, int landZ, const float *offsetsX, const float *offsetsZ)
@@ -359,45 +349,6 @@ void LandscapeRenderer::RenderLandTriangle(float x, float z, int landX, int land
 	for (int i = 0; i < 3; i++)
 		uv[i] = glm::vec2(baseUV.s + TextureMapSize * offsetsX[i], baseUV.t + TextureMapSize * offsetsZ[i]);
 
-	this->RenderLandTriangle(x, z, landX, landZ, offsetsX, offsetsZ, uv);
-}
-
-void LandscapeRenderer::RenderLandTriangle000111(float vx, float vz, int landX, int landZ)
-{
-	// Offset indicies
-	float offsetsX[3] = { 0, 0, 1 };
-	float offsetsZ[3] = { 0, 1, 1 };
-
-	// Calculate UV coordinates
-	glm::vec2 baseUV = GetTextureUV(landX, landZ);
-	glm::vec2 uv[3] = {
-		baseUV,
-		glm::vec2(baseUV.x, baseUV.y + TextureMapSize),
-		glm::vec2(baseUV.x + TextureMapSize, baseUV.y + TextureMapSize)
-	};
-
-	RenderLandTriangle(vx, vz, landX, landZ, offsetsX, offsetsZ, uv);
-}
-
-void LandscapeRenderer::RenderLandTriangle001110(float vx, float vz, int landX, int landZ)
-{
-	// Offset indicies
-	float offsetsX[3] = { 0, 1, 1 };
-	float offsetsZ[3] = { 0, 1, 0 };
-
-	// Calculate UV coordinates
-	glm::vec2 baseUV = GetTextureUV(landX, landZ);
-	glm::vec2 uv[3] = {
-		baseUV,
-		glm::vec2(baseUV.x + TextureMapSize, baseUV.y + TextureMapSize),
-		glm::vec2(baseUV.x + TextureMapSize, baseUV.y)
-	};
-
-	RenderLandTriangle(vx, vz, landX, landZ, offsetsX, offsetsZ, uv);
-}
-
-void LandscapeRenderer::RenderLandTriangle(float vx, float vz, int landX, int landZ, const float *offsetsX, const float *offsetsZ, const glm::vec2 *uv)
-{
 	for (int i = 0; i < 3; i++) {
 		const WorldTile *tile = this->world->GetTile(landX + offsetsX[i], landZ + offsetsZ[i]);
 		int height = tile->height;
@@ -417,7 +368,7 @@ void LandscapeRenderer::RenderLandTriangle(float vx, float vz, int landX, int la
 		}
 
 		this->AddVertex(
-			glm::vec3(vx + (offsetsX[i] * World::TileSize), height, vz + (offsetsZ[i] * World::TileSize)),
+			glm::vec3(x + (offsetsX[i] * World::TileSize), height, z + (offsetsZ[i] * World::TileSize)),
 			uv[i],
 			tile
 		);
@@ -436,16 +387,19 @@ void LandscapeRenderer::RenderOcean(const Camera *camera)
 	glUniformMatrix4fv(this->waterShaderUniform.projectionMatrix, 1, GL_FALSE, glm::value_ptr(this->projectionMatrix));
 	glUniformMatrix4fv(this->waterShaderUniform.modelViewMatrix, 1, GL_FALSE, glm::value_ptr(this->modelViewMatrix));
 	glUniform1f(this->waterShaderUniform.sphereRatio, SphereRatio);
-	glUniform3f(this->landShaderUniform.cameraTarget, camera->target.x, camera->target.y, camera->target.z);
+	glUniform3f(this->waterShaderUniform.cameraTarget, camera->target.x, camera->target.y, camera->target.z);
 
 	this->SetLightSources(camera, this->waterShader);
+	
+	glUniform3fv(waterShader->GetUniformLocation("InputCameraPosition"), 1, glm::value_ptr(camera->eye));
+	glUniform1f(waterShader->GetUniformLocation("iGlobalTime"), this->time / 60.0f);
 
 	glUniform1i(this->waterShader->GetUniformLocation("InputTexture0"), 0);
 
 	if (camera->viewHasChanged) {
 		waterVertices.clear();
 
-		RenderArea(camera, this->oceanViewSize, true);
+		RenderOceanPrimitives(camera);
 
 		glBindBuffer(GL_ARRAY_BUFFER, this->waterVBO);
 		glBufferData(GL_ARRAY_BUFFER, this->waterVertices.size() * sizeof(WaterVertex), this->waterVertices.data(), GL_STATIC_DRAW);
@@ -453,6 +407,62 @@ void LandscapeRenderer::RenderOcean(const Camera *camera)
 
 	glBindVertexArray(this->waterVAO);
 	glDrawArrays(GL_TRIANGLES, 0, this->waterVertices.size());
+}
+
+void LandscapeRenderer::RenderOceanPrimitives(const Camera *camera)
+{
+	float viewSize = this->landViewSize;
+	float translateX, translateZ;
+	int landOriginX, landOriginZ;
+
+	landOriginX = camera->target.x / World::TileSize;
+	landOriginZ = camera->target.z / World::TileSize;
+	translateX = camera->target.x - (landOriginX * World::TileSize);
+	translateZ = camera->target.z - (landOriginZ * World::TileSize);
+
+	float offsetsX[] = { 0, 0, 1, 0, 1, 1 };
+	float offsetsZ[] = { 0, 1, 1, 0, 1, 0 };
+
+	for (int landOffsetZ = -viewSize; landOffsetZ <= viewSize; landOffsetZ++) {
+		for (int landOffsetX = -viewSize; landOffsetX <= viewSize; landOffsetX++) {
+			int landX = this->world->TileWrap(landOriginX + landOffsetX);
+			int landZ = this->world->TileWrap(landOriginZ + landOffsetZ);
+
+			if (this->world->GetTile(landX + 0, landZ + 0)->height != 0 &&
+				this->world->GetTile(landX + 0, landZ + 1)->height != 0 &&
+				this->world->GetTile(landX + 1, landZ + 1)->height != 0 &&
+				this->world->GetTile(landX + 1, landZ + 0)->height != 0
+			) {
+				continue;
+			}
+
+			// float lengthFromCentrePoint = glm::length(glm::vec2(landOffsetX, landOffsetZ));
+			// if (lengthFromCentrePoint > viewSize)
+			// 	continue;
+			// 
+			// float angle = todegrees(atan2(landOffsetZ, -landOffsetX));
+			// float cameraAngle = wrapangledeg(camera->rotation - 90);
+			// 
+			// if (lengthFromCentrePoint > camera->zoom / 80.0f)
+			// 	if (abs(smallestangledeltadeg(angle, cameraAngle)) > 90.0f)
+			// 		continue;
+
+			float vx = camera->target.x + (landOffsetX * World::TileSize) - translateX;
+			float vz = camera->target.z + (landOffsetZ * World::TileSize) - translateZ;
+
+			int height = this->world->GetTile(landX, landZ)->height;
+
+			float uvSize = 1 / 2.0f;
+			glm::vec2 baseUV = glm::vec2(landX, landZ) * uvSize;
+			for (int i = 0; i < 6; i++) {
+				this->waterVertices.push_back({
+					{ vx + offsetsX[i] * World::TileSize, 0, vz + offsetsZ[i] * World::TileSize },
+					{ 0, 0, 0 },
+					{ baseUV.s + offsetsX[i] * uvSize, baseUV.t + offsetsZ[i] * uvSize }
+				});
+			}
+		}
+	}
 }
 
 void LandscapeRenderer::RenderOceanQuad(int landX, int landZ, float vx, float vz)
