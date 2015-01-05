@@ -1,10 +1,9 @@
 #pragma once
 
 #include "PopSS.h"
+#include "SimpleVertexBuffer.hpp"
 
 namespace IntelOrca { namespace PopSS {
-
-typedef void (*RenderQuadFunc)(int, int, float, float);
 
 struct LandVertex {
 	glm::vec3 position;
@@ -18,10 +17,6 @@ struct WaterVertex {
 	glm::vec3 position;
 	glm::vec3 normal;
 	glm::vec2 texcoords;
-};
-
-struct FogVertex {
-	glm::vec4 position;
 };
 
 enum DEBUG_LANDSCAPE_RENDER_TYPE {
@@ -50,7 +45,7 @@ public:
 	static const float TextureMapSize;
 
 	World *world;
-	unsigned char debugRenderType;
+	unsigned char lastDebugRenderType, debugRenderType;
 
 	LandscapeRenderer();
 	~LandscapeRenderer();
@@ -59,61 +54,45 @@ public:
 	void Render(const Camera *camera);
 
 private:
-	int landViewSize;
-	int oceanViewSize;
-
-	float time;
-
+	// Shared
 	glm::mat4 projectionMatrix;
 	glm::mat4 modelViewMatrix;
 
+	void SetLightSources(const Camera *camera, OrcaShader *shader);
+
+	// Land
+	int landViewSize;
+
 	OrcaShader *landShader;
-	OrcaShader *waterShader;
-
-	GLuint landVAO;
-	GLuint landVBO;
-	std::vector<LandVertex> landVertices;
-
-	GLuint waterVAO;
-	GLuint waterVBO;
-	std::vector<WaterVertex> waterVertices;
-
+	SimpleVertexBuffer<LandVertex> *landVertexBuffer;
 	LandWaterShaderUniform landShaderUniform;
-	LandWaterShaderUniform waterShaderUniform;
-
 	GLuint terrainTextures[8];
-	GLuint waterTexture;
+	GLuint shadowTexture;
 
-	OrcaShader *fogShader;
-	GLuint fogVAO;
-	GLuint fogVBO;
-	std::vector<FogVertex> fogVertices;
-
-	void RenderArea(const Camera *camera, int viewSize, bool water);
+	void InitialiseLandShader();
+	void GenerateShadowTexture();
 
 	void RenderLand(const Camera *camera);
-	void RenderLandQuad(int landX, int landZ, float x, float z);
-	void RenderLandTriangle(float x, float z, int landX, int landZ, const float *offsetsX, const float *offsetsZ);
-
-	void RenderOcean(const Camera *camera);
-	void RenderOceanPrimitives(const Camera *camera);
-
-	void RenderOceanQuad(int landX, int landZ, float vx, float vz);
-	void RenderOceanTriangle000111(float vx, float vz, int oceanX, int oceanZ);
-	void RenderOceanTriangle001110(float vx, float vz, int oceanX, int oceanZ);
-	void RenderOceanTriangle(float vx, float vz, int oceanX, int oceanZ, const int *offsetsX, const int *offsetsZ, const glm::vec2 *uv);
-	float GetWaveHeight(int oceanX, int oceanZ);
-
-	void RenderObjects(const Camera *camera);
-
-	void AddVertex(const glm::vec3 &position, const glm::vec2 &uv, const WorldTile *tile);
-	void AddVertex(const glm::vec3 &position, const glm::vec3 &normal, const glm::vec2 &uv, int texture, const glm::vec4 &material);
+	void UpdateLandPrimitives(const Camera *camera);
+	void AddLandQuad(int landX, int landZ, float x, float z);
+	void AddLandTriangle(float x, float z, int landX, int landZ, const float *offsetsX, const float *offsetsZ);
+	void AddLandVertex(const glm::vec3 &position, const glm::vec2 &uv, const WorldTile *tile);
+	void AddLandVertex(const glm::vec3 &position, const glm::vec3 &normal, const glm::vec2 &uv, int texture, const glm::vec4 &material);
 	glm::vec2 GetTextureUV(int landX, int landZ);
 	glm::vec4 GetColourFromLand(int height);
 
-	void SetLightSources(const Camera *camera, OrcaShader *shader);
+	// Water
+	int oceanViewSize;
+	float time;
 
-	void RenderSky(const Camera *camera);
+	OrcaShader *waterShader;
+	SimpleVertexBuffer<WaterVertex> *waterVertexBuffer;
+	LandWaterShaderUniform waterShaderUniform;
+	GLuint waterTexture;
+
+	void InitialiseWaterShader();
+	void RenderWater(const Camera *camera);
+	void UpdateWaterPrimitives(const Camera *camera);
 };
 
 } }

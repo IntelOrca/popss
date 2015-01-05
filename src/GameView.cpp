@@ -9,6 +9,7 @@ GameView *IntelOrca::PopSS::gGameView;
 GameView::GameView()
 {
 	this->camera.world = &this->world;
+	this->skyRenderer.world = &this->world;
 	this->landscapeRenderer.world = &this->world;
 	this->objectRenderer.world = &this->world;
 
@@ -25,6 +26,7 @@ GameView::~GameView()
 void GameView::Update()
 {
 	if (updateCounter == 0) {
+		this->skyRenderer.Initialise();
 		this->landscapeRenderer.Initialise();
 		this->objectRenderer.Initialise();
 	}
@@ -103,6 +105,7 @@ void GameView::Update()
 
 void GameView::Draw()
 {
+	this->skyRenderer.Render(&this->camera);
 	this->landscapeRenderer.Render(&this->camera);
 	this->objectRenderer.Render(&this->camera);
 

@@ -100,3 +100,5 @@ struct cursor {
 extern cursor gCursor;
 extern cursor gCursorPress;
 extern cursor gCursorRelease;
+
+#define SafeDelete(x) if (x != NULL) { delete (x); x = NULL; }

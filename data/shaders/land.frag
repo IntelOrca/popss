@@ -1,5 +1,6 @@
 #version 330
 
+uniform sampler2D uShadowTexture;
 uniform sampler2D InputTexture[8];
 
 uniform bool InputHighlightActive;
@@ -162,6 +163,12 @@ void main()
 
 	// Apply lighting
 	colour *= vec4(FragmentLighting, 1.0);
+
+	// Apply shadow
+	float shadowAmount = texture(uShadowTexture, FragmentPosition.xz / (256.0 * 128.0)).r;
+	// if (shadowAmount > 0.1) colour.rgb = vec3(0);
+	shadowAmount *= 0.1;
+	colour.rgb -= vec3(shadowAmount);
 
 	// Apply fog
 	vec3 fogcolour = vec3(0.5, 0.5, 0.7);

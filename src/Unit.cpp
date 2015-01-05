@@ -9,55 +9,6 @@
 
 using namespace IntelOrca::PopSS;
 
-struct UnitVertex {
-	glm::vec3 position;
-	glm::vec3 normal;
-};
-
-const VertexAttribPointerInfo UnitShaderVertexInfo[] = {
-	{ "VertexPosition",		GL_FLOAT,	3,	offsetof(UnitVertex, position)	},
-	{ "VertexNormal",		GL_FLOAT,	3,	offsetof(UnitVertex, normal)	},
-	{ NULL }
-};
-
-OrcaShader *unitShader = NULL;
-GLuint unitVAO;
-GLuint unitVBO;
-std::vector<UnitVertex> unitVertices;
-
-GLint projectionMatrix;
-GLint viewMatrix;
-GLint modelMatrix;
-GLint sphereRatio;
-GLint cameraTarget;
-
-const UnitVertex UnitVertexData[] = {
-	{ { -0.5, 3, -0.5 }, { 0,  0.5, 0 } },
-	{ { -0.5, 3,  0.5 }, { 0,  0.5, 0 } },
-	{ {  0.5, 3,  0.5 }, { 0,  0.5, 0 } },
-
-	{ { -0.5, 3, -0.5 }, { -1, 0, 0 } },
-	{ { -0.5, 0, -0.5 }, { -1, 0, 0 } },
-	{ { -0.5, 0,  0.5 }, { -1, 0, 0 } },
-	{ { -0.5, 3, -0.5 }, { -1, 0, 0 } },
-	{ { -0.5, 0,  0.5 }, { -1, 0, 0 } },
-	{ { -0.5, 3,  0.5 }, { -1, 0, 0 } },
-
-	{ {  0.5, 3, 0.5 }, { 0, 0, 1 } },
-	{ { -0.5, 0, 0.5 }, { 0, 0, 1 } },
-	{ {  0.5, 0, 0.5 }, { 0, 0, 1 } },
-	{ {  0.5, 3, 0.5 }, { 0, 0, 1 } },
-	{ { -0.5, 3, 0.5 }, { 0, 0, 1 } },
-	{ { -0.5, 0, 0.5 }, { 0, 0, 1 } },
-
-	{ { -0.5, 3, -0.5 }, { 1, 0, -1 } },
-	{ {  0.5, 0,  0.5 }, { 1, 0, -1 } },
-	{ { -0.5, 0, -0.5 }, { 1, 0, -1 } },
-	{ { -0.5, 3, -0.5 }, { 1, 0, -1 } },
-	{ {  0.5, 3,  0.5 }, { 1, 0, -1 } },
-	{ {  0.5, 0,  0.5 }, { 1, 0, -1 } }
-};
-
 static void SetLightSources(const Camera *camera, OrcaShader *shader)
 {
 	LightSource alight, *light = &alight;
@@ -123,57 +74,7 @@ void Unit::Update()
 	this->y = gWorld->GetHeight(this->x, this->z);
 }
 
-void Unit::Draw() const
-{
-	const Camera *camera = &gGameView->camera;
-
-	// Check if the object is close enough to the camera
-	int relativeX = this->x - (int)camera->target.x;
-	int relativeZ = this->z - (int)camera->target.z;
-	if (sqrt((relativeX * relativeX) + (relativeZ + relativeZ)) > 76 * World::TileSize)
-		return;
-
-	if (unitShader == NULL) {
-		unitShader = OrcaShader::FromPath("object.vert", "object.frag");
-		projectionMatrix = unitShader->GetUniformLocation("ProjectionMatrix");
-		viewMatrix = unitShader->GetUniformLocation("ViewMatrix");
-		modelMatrix = unitShader->GetUniformLocation("ModelMatrix");
-		sphereRatio = unitShader->GetUniformLocation("InputSphereRatio");
-		cameraTarget = unitShader->GetUniformLocation("InputCameraTarget");
-
-		glGenVertexArrays(1, &unitVAO);
-		glGenBuffers(1, &unitVBO);
-
-		glBindVertexArray(unitVAO);
-		glBindBuffer(GL_ARRAY_BUFFER, unitVBO);
-		unitShader->SetVertexAttribPointer(sizeof(UnitVertex), UnitShaderVertexInfo);
-	} else {
-		glBindVertexArray(unitVAO);
-		glBindBuffer(GL_ARRAY_BUFFER, unitVBO);
-	}
-
-	glm::mat4 pmatrix = camera->Get3dProjectionMatrix();
-	glm::mat4 vmatrix = camera->Get3dViewMatrix();
-
-	// Produce a model matrix
-	glm::mat4 mmatrix;
-	mmatrix = glm::translate(mmatrix, glm::vec3(this->position));
-	mmatrix = glm::scale(mmatrix, glm::vec3(World::TileSize / 4.0f));
-
-	unitShader->Use();
-
-	glUniformMatrix4fv(projectionMatrix, 1, GL_FALSE, glm::value_ptr(pmatrix));
-	glUniformMatrix4fv(viewMatrix, 1, GL_FALSE, glm::value_ptr(vmatrix));
-	glUniformMatrix4fv(modelMatrix, 1, GL_FALSE, glm::value_ptr(mmatrix));
-	glUniform1f(sphereRatio, LandscapeRenderer::SphereRatio);
-	glUniform3fv(cameraTarget, 1, glm::value_ptr(camera->target));
-	SetLightSources(camera, unitShader);
-
-	unitVertices.clear();
-	unitVertices.insert(unitVertices.end(), UnitVertexData, UnitVertexData + countof(UnitVertexData));
-	glBufferData(GL_ARRAY_BUFFER, unitVertices.size() * sizeof(UnitVertex), unitVertices.data(), GL_DYNAMIC_DRAW);
-	glDrawArrays(GL_TRIANGLES, 0, unitVertices.size());
-}
+void Unit::Draw() const { }
 
 void Unit::GiveMoveOrder(int x, int z)
 {

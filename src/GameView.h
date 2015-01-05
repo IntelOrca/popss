@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Camera.h"
+#include "SkyRenderer.h"
 #include "LandscapeRenderer.h"
 #include "ObjectRenderer.h"
 #include "PopSS.h"
@@ -22,6 +23,7 @@ public:
 private:
 	int updateCounter;
 
+	SkyRenderer skyRenderer;
 	LandscapeRenderer landscapeRenderer;
 	ObjectRenderer objectRenderer;
 };

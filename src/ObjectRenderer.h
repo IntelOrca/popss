@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PopSS.h"
+#include "SimpleVertexBuffer.hpp"
 
 namespace IntelOrca { namespace PopSS {
 
@@ -12,6 +13,7 @@ struct ObjectVertex {
 
 class Camera;
 class Mesh;
+class OrcaShader;
 class World;
 class ObjectRenderer {
 public:
@@ -25,13 +27,13 @@ public:
 	void Render(const Camera *camera);
 
 private:
+	Mesh *unitMesh;
+
 	Mesh *vokMesh;
 	GLuint vokTexture;
 
 	OrcaShader *objectShader = NULL;
-	GLuint objectVAO;
-	GLuint objectVBO;
-	std::vector<ObjectVertex> objectVertices;
+	SimpleVertexBuffer<ObjectVertex> *objectVertexBuffer;
 
 	struct {
 		GLint projectionMatrix;
@@ -44,6 +46,7 @@ private:
 
 	void PrepareMesh(const Mesh *mesh);
 	void RenderVertices();
+
 	static void ObjectRenderer::SetLightSources(const Camera *camera, OrcaShader *shader);
 };
 

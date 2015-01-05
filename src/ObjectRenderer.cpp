@@ -23,12 +23,20 @@ const VertexAttribPointerInfo ObjectShaderVertexInfo[] = {
 
 ObjectRenderer::ObjectRenderer()
 {
-	
+	this->objectShader = NULL;
+	this->objectVertexBuffer = NULL;
+
+	this->unitMesh = NULL;
+	this->vokMesh = NULL;
 }
 
 ObjectRenderer::~ObjectRenderer()
 {
-	delete this->vokMesh;
+	if (this->objectShader != NULL) delete this->objectShader;
+	if (this->objectVertexBuffer != NULL) delete this->objectVertexBuffer;
+
+	if (this->unitMesh != NULL) delete this->unitMesh;
+	if (this->vokMesh != NULL) delete this->vokMesh;
 }
 
 void ObjectRenderer::Initialise()
@@ -40,13 +48,9 @@ void ObjectRenderer::Initialise()
 	this->objectShaderUniforms.sphereRatio = this->objectShader->GetUniformLocation("InputSphereRatio");
 	this->objectShaderUniforms.cameraTarget = this->objectShader->GetUniformLocation("InputCameraTarget");
 	this->objectShaderUniforms.texture = this->objectShader->GetUniformLocation("InputTexture");
+	this->objectVertexBuffer = new SimpleVertexBuffer<ObjectVertex>(this->objectShader, ObjectShaderVertexInfo);
 
-	glGenVertexArrays(1, &this->objectVAO);
-	glGenBuffers(1, &this->objectVBO);
-
-	glBindVertexArray(this->objectVAO);
-	glBindBuffer(GL_ARRAY_BUFFER, this->objectVBO);
-	this->objectShader->SetVertexAttribPointer(sizeof(ObjectVertex), ObjectShaderVertexInfo);
+	this->unitMesh = Mesh::FromObjectFile("data/objects/unit.object");
 
 	this->vokMesh = Mesh::FromObjectFile("data/objects/vok.object");
 
@@ -82,8 +86,21 @@ void ObjectRenderer::Render(const Camera *camera)
 	glUniform1i(this->objectShaderUniforms.texture, 0);
 	SetLightSources(camera, this->objectShader);
 
-	glBindVertexArray(this->objectVAO);
-	glBindBuffer(GL_ARRAY_BUFFER, this->objectVBO);
+	// Render units
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, this->vokTexture);
+	PrepareMesh(this->unitMesh);
+	for (WorldObject *worldObject : this->world->objects) {
+		if (worldObject->group == OBJECT_GROUP_UNIT) {	
+			glm::mat4 mmatrix;
+			mmatrix = glm::translate(mmatrix, glm::vec3(worldObject->position));
+			mmatrix = glm::rotate(mmatrix, (worldObject->rotation / 128.0f) * (float)M_PI, glm::vec3(0, 1, 0));
+			mmatrix = glm::scale(mmatrix, glm::vec3(0.5 * World::TileSize));
+
+			glUniformMatrix4fv(this->objectShaderUniforms.modelMatrix, 1, GL_FALSE, glm::value_ptr(mmatrix));
+			RenderVertices();
+		}
+	}
 
 	// Render vault of knowledges
 	glActiveTexture(GL_TEXTURE0);
@@ -107,7 +124,7 @@ void ObjectRenderer::Render(const Camera *camera)
 
 void ObjectRenderer::PrepareMesh(const Mesh *mesh)
 {
-	this->objectVertices.clear();
+	this->objectVertexBuffer->Clear();
 	for (int i = 0; i < mesh->numFaces; i++) {
 		const Mesh::Face *face = &mesh->faces[i];
 		glm::vec3 vertices[3];
@@ -124,15 +141,15 @@ void ObjectRenderer::PrepareMesh(const Mesh *mesh)
 			vertex.position = vertices[j];
 			vertex.normal = normal;
 			vertex.texcoords = texcoords[j];
-			this->objectVertices.push_back(vertex);
+			this->objectVertexBuffer->Add(vertex);
 		}
 	}
+	this->objectVertexBuffer->Update();
 }
 
 void ObjectRenderer::RenderVertices()
 {
-	glBufferData(GL_ARRAY_BUFFER, this->objectVertices.size() * sizeof(ObjectVertex), this->objectVertices.data(), GL_DYNAMIC_DRAW);
-	glDrawArrays(GL_TRIANGLES, 0, this->objectVertices.size());
+	this->objectVertexBuffer->Draw(GL_TRIANGLES);
 }
 
 void ObjectRenderer::SetLightSources(const Camera *camera, OrcaShader *shader)

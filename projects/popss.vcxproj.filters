@@ -6,7 +6,6 @@
   <ItemGroup>
     <ClCompile Include="..\src\Audio.cpp" />
     <ClCompile Include="..\src\PopSS.cpp" />
-    <ClCompile Include="..\src\LandscapeRenderer.cpp" />
     <ClCompile Include="..\src\World.cpp" />
     <ClCompile Include="..\src\TerrainStyle.cpp" />
     <ClCompile Include="..\src\Camera.cpp" />
@@ -28,7 +27,15 @@
       <Filter>Objects\Buildings</Filter>
     </ClCompile>
     <ClCompile Include="..\src\Mesh.cpp" />
-    <ClCompile Include="..\src\ObjectRenderer.cpp" />
+    <ClCompile Include="..\src\LandscapeRenderer.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ObjectRenderer.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\SkyRenderer.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Audio.h" />
@@ -36,7 +43,6 @@
       <Filter>Util</Filter>
     </ClInclude>
     <ClInclude Include="..\src\PopSS.h" />
-    <ClInclude Include="..\src\LandscapeRenderer.h" />
     <ClInclude Include="..\src\Camera.h" />
     <ClInclude Include="..\src\World.h" />
     <ClInclude Include="..\src\TerrainStyle.h" />
@@ -56,7 +62,16 @@
       <Filter>Objects\Buildings</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Mesh.h" />
-    <ClInclude Include="..\src\ObjectRenderer.h" />
+    <ClInclude Include="..\src\LandscapeRenderer.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ObjectRenderer.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\SkyRenderer.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\SimpleVertexBuffer.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Util">
@@ -85,6 +100,9 @@
     </Filter>
     <Filter Include="Objects\Buildings">
       <UniqueIdentifier>{0436b570-8b78-4e28-bbef-479e66570a10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Rendering">
+      <UniqueIdentifier>{2c8cdc93-aa8d-461f-8946-459ea4c4d684}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -145,6 +163,12 @@
       <Filter>data\shaders</Filter>
     </None>
     <None Include="..\data\shaders\fog.frag">
+      <Filter>data\shaders</Filter>
+    </None>
+    <None Include="..\data\shaders\solid.frag">
+      <Filter>data\shaders</Filter>
+    </None>
+    <None Include="..\data\shaders\land_wireframe.frag">
       <Filter>data\shaders</Filter>
     </None>
   </ItemGroup>

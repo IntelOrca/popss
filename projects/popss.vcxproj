@@ -31,6 +31,7 @@
     <ClCompile Include="..\src\OrcaShader.cpp" />
     <ClCompile Include="..\src\Pathfinding.cpp" />
     <ClCompile Include="..\src\PopSS.cpp" />
+    <ClCompile Include="..\src\SkyRenderer.cpp" />
     <ClCompile Include="..\src\TerrainStyle.cpp" />
     <ClCompile Include="..\src\Unit.cpp" />
     <ClCompile Include="..\src\util\MathExtensions.cpp" />
@@ -50,6 +51,8 @@
     <ClInclude Include="..\src\OrcaShader.h" />
     <ClInclude Include="..\src\Pathfinding.h" />
     <ClInclude Include="..\src\PopSS.h" />
+    <ClInclude Include="..\src\SimpleVertexBuffer.hpp" />
+    <ClInclude Include="..\src\SkyRenderer.h" />
     <ClInclude Include="..\src\TerrainStyle.h" />
     <ClInclude Include="..\src\Unit.h" />
     <ClInclude Include="..\src\util\MathExtensions.hpp" />
@@ -74,11 +77,13 @@
     <None Include="..\data\shaders\land.frag" />
     <None Include="..\data\shaders\land.vert" />
     <None Include="..\data\shaders\landscape.glsl" />
+    <None Include="..\data\shaders\land_wireframe.frag" />
     <None Include="..\data\shaders\lighting.glsl" />
     <None Include="..\data\shaders\object.frag" />
     <None Include="..\data\shaders\object.vert" />
     <None Include="..\data\shaders\sky.frag" />
     <None Include="..\data\shaders\sky.vert" />
+    <None Include="..\data\shaders\solid.frag" />
     <None Include="..\data\shaders\water.frag" />
     <None Include="..\data\shaders\water.vert" />
   </ItemGroup>
