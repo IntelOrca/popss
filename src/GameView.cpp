@@ -16,6 +16,10 @@ GameView::GameView()
 	this->world.LoadLandFromPOPTB("data/maps/levl2011.dat");
 
 	gWorld = &this->world;
+
+	this->editLandMode = true;
+	this->editLandX = -1;
+	this->editLandZ = -1;
 }
 
 GameView::~GameView()
@@ -56,51 +60,122 @@ void GameView::Update()
 	else if (gCursor.wheel > 0)
 		this->camera.ZoomIn();
 
-	if (gCursorPress.button & SDL_BUTTON_RMASK) {
-		for (Unit *unit : this->world.selectedUnits)
-			unit->selected = false;
-
-		this->world.selectedUnits.clear();
-	}
-
-	if (gCursor.button & SDL_BUTTON_LMASK) {
-		glm::ivec3 worldPosition;
-		if (this->camera.GetWorldPositionFromViewport(gCursor.x, gCursor.y, &worldPosition)) {
-			if (this->world.selectedUnits.size() == 0) {
-				if (gCursorPress.button & SDL_BUTTON_LMASK) {
-					this->world.landHighlightSource.x = worldPosition.x;
-					this->world.landHighlightSource.z = worldPosition.z;
-					this->world.landHighlightTarget.x = worldPosition.x;
-					this->world.landHighlightTarget.z = worldPosition.z;
-				} else {
-					this->world.landHighlightTarget.x = worldPosition.x;
-					this->world.landHighlightTarget.z = worldPosition.z;
-				}
-				this->world.landHighlightActive = true;
+	if (this->editLandMode) {
+		if ((gCursorPress.button & (SDL_BUTTON_LMASK | SDL_BUTTON_RMASK)) || gCursor.x != this->lastCursorX || gCursor.y != this->lastCursorY) {
+			glm::ivec3 worldPosition;
+			if (this->camera.GetWorldPositionFromViewport(gCursor.x, gCursor.y, &worldPosition)) {
+				this->editLandX = worldPosition.x / World::TileSize;
+				this->editLandZ = worldPosition.z / World::TileSize;
 			} else {
-				for (Unit *unit : this->world.selectedUnits)
-					unit->GiveMoveOrder(worldPosition.x, worldPosition.z);
+				this->editLandX = -1;
+				this->editLandZ = -1;
 			}
 		}
-	} else {
-		if (this->world.landHighlightActive) {
-			glm::ivec3 source = this->world.landHighlightSource;
-			glm::ivec3 target = this->world.landHighlightTarget;
 
-			for (WorldObject *obj : this->world.objects) {
-				if (obj->x >= source.x && obj->z >= source.z && obj->x <= target.x && obj->z <= target.z) {
-					if (obj->group == OBJECT_GROUP_UNIT) {
-						Unit *unit = (Unit*)obj;
-						unit->selected = true;
-						this->world.selectedUnits.push_back(unit);
+		int landIncreaseDecrease = 0;
+		if (gCursor.button & SDL_BUTTON_LMASK)
+			landIncreaseDecrease = 1;
+		else if (gCursor.button & SDL_BUTTON_RMASK)
+			landIncreaseDecrease = -1;
+
+		if (landIncreaseDecrease != 0 && this->editLandX != -1 && this->editLandZ != -1) {
+			int *originalHeight = NULL;
+			
+			bool average = gIsScanKey[SDL_SCANCODE_LCTRL] & KEY_DOWN;
+			if (average) {
+				originalHeight = new int[this->world.size * this->world.size];
+				for (int z = 0; z < this->world.size; z++)
+					for (int x = 0; x < this->world.size; x++)
+						originalHeight[x + z * this->world.size] = this->world.GetTile(x, z)->height;
+			}
+
+			int radius = 3;
+			for (int z = -radius; z <= radius; z++) {
+				for (int x = -radius; x <= radius; x++) {
+					float distance = sqrt(x * x + z * z);
+					if (distance > radius)
+						continue;
+
+					WorldTile *tile = this->world.GetTile(this->editLandX + x, this->editLandZ + z);
+
+					if (average) {
+						int targetHeight = 0;
+						for (int zz = -1; zz <= 1; zz++)
+							for (int xx = -1; xx <= 1; xx++)
+								targetHeight += originalHeight[(this->editLandX + x + xx) + (this->editLandZ + z + zz) * this->world.size];
+						targetHeight /= 9;
+
+						int heightDiff = targetHeight - (int)tile->height;
+
+						tile->height = clamp((int)tile->height + min(2, abs(heightDiff)) * glm::sign(heightDiff), 0, 1024);
+					} else {
+						int heightDiff = ((radius - distance) + 1) * 2;
+						tile->height = clamp((int)tile->height + heightDiff * landIncreaseDecrease, 0, 1024);
 					}
 				}
 			}
+
+			if (average)
+				delete[] originalHeight;
+
+			for (int z = -radius * 2; z <= radius * 2; z++) {
+				for (int x = -radius * 2; x <= radius * 2; x++) {
+					this->world.ProcessTile(this->world.TileWrap(this->editLandX + x), this->world.TileWrap(this->editLandZ + z));
+				}
+			}
+
+			this->camera.viewHasChanged = true;
 		}
-		this->world.landHighlightActive = false;
+	} else {
+		if (gCursorPress.button & SDL_BUTTON_RMASK) {
+			for (Unit *unit : this->world.selectedUnits)
+				unit->selected = false;
+
+			this->world.selectedUnits.clear();
+		}
+
+		if (gCursor.button & SDL_BUTTON_LMASK) {
+			glm::ivec3 worldPosition;
+			if (this->camera.GetWorldPositionFromViewport(gCursor.x, gCursor.y, &worldPosition)) {
+				if (this->world.selectedUnits.size() == 0) {
+					if (gCursorPress.button & SDL_BUTTON_LMASK) {
+						this->world.landHighlightSource.x = worldPosition.x;
+						this->world.landHighlightSource.z = worldPosition.z;
+						this->world.landHighlightTarget.x = worldPosition.x;
+						this->world.landHighlightTarget.z = worldPosition.z;
+					} else {
+						this->world.landHighlightTarget.x = worldPosition.x;
+						this->world.landHighlightTarget.z = worldPosition.z;
+					}
+					this->world.landHighlightActive = true;
+				} else {
+					for (Unit *unit : this->world.selectedUnits)
+						unit->GiveMoveOrder(worldPosition.x, worldPosition.z);
+				}
+			}
+		} else {
+			if (this->world.landHighlightActive) {
+				glm::ivec3 source = this->world.landHighlightSource;
+				glm::ivec3 target = this->world.landHighlightTarget;
+
+				for (WorldObject *obj : this->world.objects) {
+					if (obj->x >= source.x && obj->z >= source.z && obj->x <= target.x && obj->z <= target.z) {
+						if (obj->group == OBJECT_GROUP_UNIT) {
+							Unit *unit = (Unit*)obj;
+							unit->selected = true;
+							this->world.selectedUnits.push_back(unit);
+						}
+					}
+				}
+			}
+			this->world.landHighlightActive = false;
+		}
 	}
 
 	updateCounter++;
+
+	this->lastCursorX = gCursor.x;
+	this->lastCursorY = gCursor.y;
 }
 
 void GameView::Draw()

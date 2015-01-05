@@ -26,6 +26,10 @@ private:
 	SkyRenderer skyRenderer;
 	LandscapeRenderer landscapeRenderer;
 	ObjectRenderer objectRenderer;
+
+	bool editLandMode;
+	int editLandX, editLandZ;
+	int lastCursorX, lastCursorY;
 };
 
 extern GameView *gGameView;
