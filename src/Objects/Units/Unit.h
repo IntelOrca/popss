@@ -1,8 +1,18 @@
 #pragma once
 
-#include "WorldObject.h"
+#include "../WorldObject.h"
 
 namespace IntelOrca { namespace PopSS {
+
+enum {
+	UNIT_WILDMAN,
+	UNIT_BRAVE,
+	UNIT_WARRIOR,
+	UNIT_PREIST,
+	UNIT_FIREWARRIOR,
+	UNIT_SPY,
+	UNIT_SHAMAN
+};
 
 class Unit : public WorldObject {
 public:
@@ -16,7 +26,6 @@ public:
 	override ~Unit();
 
 	override void Update();
-	override void Draw() const;
 
 	void GiveMoveOrder(int x, int z);
 };

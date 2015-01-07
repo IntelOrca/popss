@@ -14,8 +14,3 @@ void Building::Update()
 {
 	this->y = gWorld->GetTile(this->x / World::TileSize, this->z / World::TileSize)->height;
 }
-
-void Building::Draw() const
-{
-
-}

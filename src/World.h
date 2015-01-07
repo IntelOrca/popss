@@ -23,6 +23,8 @@ public:
 	static const float SkyDomeRadius;
 
 	int size;
+	int sizeSquared;
+	int sizeByNonTiles;
 	int numTerrainStyles;
 	TerrainStyle *terrainStyles;
 
@@ -42,7 +44,7 @@ public:
 	void ProcessTile(int x, int z);
 	
 	bool IsShore(int landX, int landZ) const;
-	int *World::GenerateDistanceFromWaterMap() const;
+	void GenerateDistanceFromWaterMap();
 
 	glm::vec3 CalculateNormal(int landX, int landZ) const;
 	static glm::vec3 CalculateNormal(float height, float westHeight, float eastHeight, float northHeight, float southHeight);
@@ -64,7 +66,7 @@ public:
 
 private:
 	WorldTile *tiles;
-	int *distanceFromWaterMap;
+	Grid<int> distanceFromWaterMap;
 };
 
 extern World *gWorld;

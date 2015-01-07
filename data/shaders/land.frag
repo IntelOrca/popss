@@ -166,7 +166,6 @@ void main()
 
 	// Apply shadow
 	float shadowAmount = texture(uShadowTexture, FragmentPosition.xz / (256.0 * 128.0)).r;
-	// if (shadowAmount > 0.1) colour.rgb = vec3(0);
 	shadowAmount *= 0.1;
 	colour.rgb -= vec3(shadowAmount);
 

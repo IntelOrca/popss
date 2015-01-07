@@ -32,6 +32,7 @@ public:
 	bool GetWorldPositionFromViewport(int x, int y, glm::ivec3 *outPosition) const;
 
 	void Update();
+	void UpdateEye();
 
 	void RotateLeft();
 	void RotateRight();
@@ -46,8 +47,6 @@ public:
 	void ZoomOut();
 
 private:
-	void UpdateEye();
-
 	glm::vec3 GetViewportRayDirection(int x, int y) const;
 	glm::vec3 SphereDistort(const glm::vec3 &position, float ratio) const;
 };

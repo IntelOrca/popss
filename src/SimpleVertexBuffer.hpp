@@ -42,13 +42,14 @@ public:
 		this->vertices.push_back(vertex);
 	}
 
+	int Count() { return this->vertices.size(); }
+
 	void Update() {
 		glBindBuffer(GL_ARRAY_BUFFER, this->vbo);
 		glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(T), this->vertices.data(), this->usage);
 	}
 
 	void Draw(GLenum mode) {
-		glBindVertexArray(this->vao);
 		this->Draw(mode, 0, this->vertices.size());
 	}
 
@@ -61,7 +62,7 @@ public:
 		return this->vertices[index];
 	}
 
-private:
+public:
 	GLuint vao;
 	GLuint vbo;
 	std::vector<T> vertices;

@@ -5,7 +5,7 @@
 #include "ObjectRenderer.h"
 #include "OrcaShader.h"
 #include "World.h"
-#include "WorldObject.h"
+#include "Objects/WorldObject.h"
 #include "Objects/Buildings/Building.h"
 
 #include <glm/gtc/matrix_transform.hpp>

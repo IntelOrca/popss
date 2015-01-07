@@ -5,15 +5,13 @@
 uniform float iGlobalTime;
 uniform vec3 InputCameraPosition;
 uniform vec3 InputCameraTarget;
-uniform sampler2D InputTexture0;
+uniform sampler2D uShadowTexture;
 
 // Light sources
 uniform int InputLightSourcesCount;
 uniform LightSource InputLightSources[8];
 
 in vec3 FragmentPosition;
-in vec3 FragmentNormal;
-in vec2 FragmentTextureCoords;
 in vec3 FragmentLighting;
 in float FragmentFog;
 
@@ -147,6 +145,10 @@ void main()
 	vec3 light = normalize(vec3(0.0, 1.0, 0.8));
 	colour.rgb = getSeaColor(p, n, light, normalize(dist), dist);
 
+	// Apply shadow
+	float shadowAmount = texture(uShadowTexture, FragmentPosition.xz / (256.0 * 128.0)).r;
+	shadowAmount *= 0.1;
+	colour.rgb -= vec3(shadowAmount);
+
 	OutputColour = colour;
-	// texture(InputTexture0, FragmentTextureCoords);
 }

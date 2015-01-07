@@ -3,7 +3,8 @@
 #include "landscape.glsl"
 #include "lighting.glsl"
 
-uniform mat4 ModelViewMatrix;
+uniform mat4 ModelMatrix;
+uniform mat4 ViewMatrix;
 uniform mat4 ProjectionMatrix;
 
 uniform float InputSphereRatio;
@@ -14,24 +15,17 @@ uniform int InputLightSourcesCount;
 uniform LightSource InputLightSources[8];
 
 in vec3 VertexPosition;
-in vec3 VertexNormal;
-in vec2 VertexTextureCoords;
 
 out vec3 FragmentPosition;
-out vec3 FragmentNormal;
-out vec2 FragmentTextureCoords;
 out vec3 FragmentLighting;
 out float FragmentFog;
 
 void main()
 {
-	// Distort the vertex position so that we get a spherical effect
-	vec3 newVertexPosition = SphereDistort(VertexPosition, InputCameraTarget, InputSphereRatio);
-	FragmentPosition = VertexPosition;
-	FragmentNormal = VertexNormal;
+	vec3 modelVertexPosition = (ModelMatrix * vec4(VertexPosition, 1.0)).xyz;
+	vec3 distortedVertexPosition = SphereDistort(modelVertexPosition, InputCameraTarget, InputSphereRatio);
 
-	// Fragment texture
-	FragmentTextureCoords = VertexTextureCoords;
+	FragmentPosition = modelVertexPosition;
 
 	// Calculate fragment lighting
 	vec3 totalLighting = vec3(0.0);
@@ -41,14 +35,14 @@ void main()
 			InputLightSources[i].Ambient, InputLightSources[i].Diffuse, InputLightSources[i].Specular,
 			// Ambient, Diffuse, specular, shininess
 			vec3(1.0), vec3(0.0, 0.0, 1.0), vec3(4.0), 16.0,
-			InputLightSources[i].Position, newVertexPosition, VertexNormal
+			InputLightSources[i].Position, modelVertexPosition, vec3(0, 1, 0)
 		);
 	}
 	FragmentLighting = totalLighting;
 
 	// Calculate fragment fog
-	FragmentFog = GetFogFactor(VertexPosition, InputCameraTarget, 256 * 8, 256 * 16);
+	FragmentFog = GetFogFactor(modelVertexPosition, InputCameraTarget, 256 * 8, 256 * 16);
 
 	// Position
-	gl_Position = ProjectionMatrix * ModelViewMatrix * vec4(newVertexPosition, 1.0);
+	gl_Position = ProjectionMatrix * ViewMatrix * vec4(distortedVertexPosition, 1.0);
 }

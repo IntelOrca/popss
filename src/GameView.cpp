@@ -1,6 +1,6 @@
 #include "GameView.h"
-#include "Unit.h"
-#include "WorldObject.h"
+#include "Objects/Units/Unit.h"
+#include "Objects/WorldObject.h"
 
 using namespace IntelOrca::PopSS;
 
@@ -20,6 +20,15 @@ GameView::GameView()
 	this->editLandMode = true;
 	this->editLandX = -1;
 	this->editLandZ = -1;
+
+	for (WorldObject *obj : this->world.objects) {
+		if (obj->type == UNIT_SHAMAN && obj->group == OBJECT_GROUP_UNIT && obj->ownership == 0) {
+			this->camera.target.x = obj->position.x;
+			this->camera.target.z = obj->position.z;
+			break;
+		}
+	}
+	this->camera.UpdateEye();
 }
 
 GameView::~GameView()
@@ -123,7 +132,18 @@ void GameView::Update()
 					this->world.ProcessTile(this->world.TileWrap(this->editLandX + x), this->world.TileWrap(this->editLandZ + z));
 				}
 			}
+			this->landscapeRenderer.SetDirtyTile(
+				this->editLandX - radius * 2,
+				this->editLandZ - radius * 2,
+				this->editLandX + radius * 2,
+				this->editLandZ + radius * 2
+			);
 
+			this->camera.viewHasChanged = true;
+		}
+
+		if (gCursorRelease.button & (SDL_BUTTON_LMASK | SDL_BUTTON_RMASK)) {
+			this->world.Reprocess();
 			this->camera.viewHasChanged = true;
 		}
 	} else {
@@ -180,9 +200,9 @@ void GameView::Update()
 
 void GameView::Draw()
 {
-	this->skyRenderer.Render(&this->camera);
+	// this->skyRenderer.Render(&this->camera);
 	this->landscapeRenderer.Render(&this->camera);
-	this->objectRenderer.Render(&this->camera);
+	// this->objectRenderer.Render(&this->camera);
 
 	this->camera.viewHasChanged = false;
 }

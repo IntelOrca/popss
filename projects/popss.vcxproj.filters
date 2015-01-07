@@ -14,8 +14,6 @@
     <ClCompile Include="..\lib\lodepng\lodepng.cpp">
       <Filter>Libraries</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\WorldObject.cpp" />
-    <ClCompile Include="..\src\Unit.cpp" />
     <ClCompile Include="..\src\util\MathExtensions.cpp">
       <Filter>Util</Filter>
     </ClCompile>
@@ -36,6 +34,18 @@
     <ClCompile Include="..\src\SkyRenderer.cpp">
       <Filter>Rendering</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\Objects\Units\Unit.cpp">
+      <Filter>Objects\Units</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Objects\WorldObject.cpp">
+      <Filter>Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Objects\Units\Shaman.cpp">
+      <Filter>Objects\Units</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Objects\Units\Wildman.cpp">
+      <Filter>Objects\Units</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Audio.h" />
@@ -52,8 +62,6 @@
     <ClInclude Include="..\src\GameView.h" />
     <ClInclude Include="..\src\OrcaShader.h" />
     <ClInclude Include="..\src\LightSource.h" />
-    <ClInclude Include="..\src\WorldObject.h" />
-    <ClInclude Include="..\src\Unit.h" />
     <ClInclude Include="..\src\Pathfinding.h" />
     <ClInclude Include="..\src\Objects\Buildings\VaultOfKnowledge.h">
       <Filter>Objects\Buildings</Filter>
@@ -72,6 +80,21 @@
       <Filter>Rendering</Filter>
     </ClInclude>
     <ClInclude Include="..\src\SimpleVertexBuffer.hpp" />
+    <ClInclude Include="..\src\Objects\Units\Unit.h">
+      <Filter>Objects\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Objects\WorldObject.h">
+      <Filter>Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Objects\Units\Shaman.h">
+      <Filter>Objects\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Objects\Units\Wildman.h">
+      <Filter>Objects\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Util\Grid.hpp">
+      <Filter>Util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Util">
@@ -103,6 +126,9 @@
     </Filter>
     <Filter Include="Rendering">
       <UniqueIdentifier>{2c8cdc93-aa8d-461f-8946-459ea4c4d684}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\Units">
+      <UniqueIdentifier>{e3ae908a-e075-4f67-85bd-fb73782eed9d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

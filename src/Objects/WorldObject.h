@@ -1,6 +1,6 @@
 #pragma once
 
-#include "PopSS.h"
+#include "../PopSS.h"
 
 namespace IntelOrca { namespace PopSS {
 
@@ -37,7 +37,6 @@ public:
 	virtual ~WorldObject();
 
 	virtual void Update();
-	virtual void Draw() const;
 };
 
 } }

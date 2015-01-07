@@ -13,8 +13,3 @@ void VaultOfKnowledge::Update()
 {
 	
 }
-
-void VaultOfKnowledge::Draw() const
-{
-
-}

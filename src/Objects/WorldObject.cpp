@@ -14,5 +14,3 @@ WorldObject::WorldObject()
 WorldObject::~WorldObject() { }
 
 void WorldObject::Update() { }
-
-void WorldObject::Draw() const { }

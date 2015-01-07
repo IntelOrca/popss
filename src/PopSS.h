@@ -28,10 +28,21 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "Util/Grid.hpp"
+
 #define abstract
 #define interface struct
 #define override virtual
 #define abstract_method = 0
+
+typedef unsigned char uint8;
+typedef unsigned short uint16;
+typedef unsigned int uint32;
+typedef unsigned long long uint64;
+typedef char sint8;
+typedef short sint16;
+typedef int sint32;
+typedef long long sint64;
 
 #define countof(x) (sizeof((x)) / sizeof((x)[0]))
 

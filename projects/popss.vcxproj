@@ -28,15 +28,17 @@
     <ClCompile Include="..\src\ObjectRenderer.cpp" />
     <ClCompile Include="..\src\Objects\Buildings\Building.cpp" />
     <ClCompile Include="..\src\Objects\Buildings\VaultOfKnowledge.cpp" />
+    <ClCompile Include="..\src\Objects\Units\Shaman.cpp" />
+    <ClCompile Include="..\src\Objects\Units\Unit.cpp" />
+    <ClCompile Include="..\src\Objects\Units\Wildman.cpp" />
+    <ClCompile Include="..\src\Objects\WorldObject.cpp" />
     <ClCompile Include="..\src\OrcaShader.cpp" />
     <ClCompile Include="..\src\Pathfinding.cpp" />
     <ClCompile Include="..\src\PopSS.cpp" />
     <ClCompile Include="..\src\SkyRenderer.cpp" />
     <ClCompile Include="..\src\TerrainStyle.cpp" />
-    <ClCompile Include="..\src\Unit.cpp" />
     <ClCompile Include="..\src\util\MathExtensions.cpp" />
     <ClCompile Include="..\src\World.cpp" />
-    <ClCompile Include="..\src\WorldObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Audio.h" />
@@ -48,17 +50,20 @@
     <ClInclude Include="..\src\ObjectRenderer.h" />
     <ClInclude Include="..\src\Objects\Buildings\Building.h" />
     <ClInclude Include="..\src\Objects\Buildings\VaultOfKnowledge.h" />
+    <ClInclude Include="..\src\Objects\Units\Shaman.h" />
+    <ClInclude Include="..\src\Objects\Units\Unit.h" />
+    <ClInclude Include="..\src\Objects\Units\Wildman.h" />
+    <ClInclude Include="..\src\Objects\WorldObject.h" />
     <ClInclude Include="..\src\OrcaShader.h" />
     <ClInclude Include="..\src\Pathfinding.h" />
     <ClInclude Include="..\src\PopSS.h" />
     <ClInclude Include="..\src\SimpleVertexBuffer.hpp" />
     <ClInclude Include="..\src\SkyRenderer.h" />
     <ClInclude Include="..\src\TerrainStyle.h" />
-    <ClInclude Include="..\src\Unit.h" />
+    <ClInclude Include="..\src\Util\Grid.hpp" />
     <ClInclude Include="..\src\util\MathExtensions.hpp" />
     <ClInclude Include="..\src\util\Random.hpp" />
     <ClInclude Include="..\src\World.h" />
-    <ClInclude Include="..\src\WorldObject.h" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="..\app.manifest" />

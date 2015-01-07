@@ -1,7 +1,7 @@
+#include "Objects/Units/Unit.h"
+#include "Objects/WorldObject.h"
 #include "TerrainStyle.h"
-#include "Unit.h"
 #include "World.h"
-#include "WorldObject.h"
 
 using namespace IntelOrca::PopSS;
 
@@ -14,7 +14,6 @@ const float World::SkyDomeRadius = 96.0f * TileSize;
 World::World()
 {
 	this->tiles = NULL;
-	this->distanceFromWaterMap = NULL;
 
 	this->numTerrainStyles = 6;
 	this->terrainStyles = new TerrainStyle[this->numTerrainStyles];
@@ -43,29 +42,12 @@ World::World()
 
 	// Snow
 	this->terrainStyles[5].textureIndex = 2;
-
-	glm::ivec2 unitPositions[] = {
-		{ 128, 120 },
-		{ 128, 121 },
-		{ 128, 122 },
-		{ 128, 123 },
-		{ 128, 124 }
-	};
-
-	for (glm::ivec2 unitPosition : unitPositions) {
-		Unit *unit = new Unit();
-		unit->position = glm::vec3(unitPosition.x * World::TileSize, 0, unitPosition.y * World::TileSize);
-		this->objects.push_back(unit);
-	}
 }
 
 World::~World()
 {
 	if (this->tiles != NULL)
 		delete[] this->tiles;
-
-	if (this->distanceFromWaterMap == NULL)
-		delete[] this->distanceFromWaterMap;
 }
 
 void World::Update()
@@ -76,10 +58,7 @@ void World::Update()
 
 void World::Reprocess()
 {
-	if (this->distanceFromWaterMap == NULL)
-		delete[] this->distanceFromWaterMap;
-
-	this->distanceFromWaterMap = GenerateDistanceFromWaterMap();
+	GenerateDistanceFromWaterMap();
 	for (int x = 0; x < this->size; x++)
 		for (int z = 0; z < this->size; z++)
 			ProcessTile(x, z);
@@ -98,46 +77,55 @@ void World::ProcessTile(int x, int z)
 	tile->shore = IsShore(x, z);
 }
 
-int *World::GenerateDistanceFromWaterMap() const
+void World::GenerateDistanceFromWaterMap()
 {
-	int *distanceMap = new int[this->size * this->size];
-	int numTilesSet = 0;
-	int totalNumTiles = this->size * this->size;
-
 	struct xzdist { int x, z, distance; };
 
-	std::queue<xzdist> tileQueue;
-	for (int z = 0; z < this->size; z++) {
-		for (int x = 0; x < this->size; x++) {
-			if (this->tiles[x + (z * this->size)].height == 0) {
+	int mapSize = this->size;
+
+	Grid<int> distanceMap = Grid<int>(mapSize);
+	int numTilesSet = 0;
+	int totalNumTiles = mapSize * mapSize;
+
+	// An array is used as std::queue was far too slow
+	xzdist *tileQueue = new xzdist[mapSize * mapSize];
+	int tileQueueFrontIndex = 0;
+	int tileQueueBackIndex = 0;
+
+	// Initialise queue and distance map with water tiles
+	for (int z = 0; z < mapSize; z++) {
+		for (int x = 0; x < mapSize; x++) {
+			if (this->tiles[x + (z * mapSize)].height == 0) {
 				numTilesSet++;
-				distanceMap[x + (z * this->size)] = 0;
-				tileQueue.push({ x, z, 0 });
+				distanceMap.Set(x, z, 0);
+				tileQueue[tileQueueBackIndex++] = { x, z, 0 };
 			} else {
-				distanceMap[x + (z * this->size)] = -1;
+				distanceMap.Set(x, z, -1);
 			}
 		}
 	}
 
-	while (tileQueue.size() > 0 && numTilesSet < totalNumTiles) {
-		xzdist tile = tileQueue.front();
-		tileQueue.pop();
+	// Breath first search until all tiles are set
+	while (tileQueueFrontIndex != tileQueueBackIndex && numTilesSet < totalNumTiles) {
+		xzdist tile = tileQueue[tileQueueFrontIndex++];
 
 		for (int z = -1; z <= 1; z++) {
 			for (int x = -1; x <= 1; x++) {
 				int xx = TileWrap(tile.x + x);
 				int zz = TileWrap(tile.z + z);
 
-				if (distanceMap[xx + (zz * this->size)] != -1)
+				if (distanceMap.Get(xx, zz) != -1)
 					continue;
 				numTilesSet++;
-				distanceMap[xx + (zz * this->size)] = tile.distance + 1;
-				tileQueue.push({ xx, zz, tile.distance + 1 });
+				distanceMap.Set(xx, zz, tile.distance + 1);
+				tileQueue[tileQueueBackIndex++] = { xx, zz, tile.distance + 1 };
+				// tileQueue.push({ xx, zz, tile.distance + 1 });
 			}
 		}
 	}
-
-	return distanceMap;
+	
+	delete[] tileQueue;
+	this->distanceFromWaterMap = distanceMap;
 }
 
 bool World::IsShore(int landX, int landZ) const
@@ -203,7 +191,7 @@ int World::CalculateTerrain(int landX, int landZ) const
 {
 	int height = this->GetTile(landX, landZ)->height;
 	int steepness = GetSteepness(landX, landZ);
-	int distanceFromWater = this->distanceFromWaterMap[landX + (landZ * this->size)];
+	int distanceFromWater = this->distanceFromWaterMap.Get(landX, landZ);
 
 	for (int i = 0; i < this->numTerrainStyles; i++) {
 		TerrainStyle *ts = &this->terrainStyles[i];
@@ -221,42 +209,63 @@ int World::CalculateTerrain(int landX, int landZ) const
 	return 255;
 }
 
+#include "Objects/Units/Wildman.h"
+#include "Objects/Units/Shaman.h"
 #include "Objects/Buildings/VaultOfKnowledge.h"
 
 void World::LoadLandFromPOPTB(const char *path)
 {
-	unsigned short *heightMap = new unsigned short[128 * 128];
+	Grid<uint16> heightMap = Grid<uint16>(128);
 
 	FILE *file = fopen(path, "rb");
 	if (file == NULL)
 		exit(-1);
 
-	fread(heightMap, 128 * 128 * 2, 1, file);
+	fread(heightMap.GetData(), heightMap.GetDataSize(), 1, file);
 	fseek(file, 0x14043, SEEK_SET);
 	for (int i = 0; i < 2000; i++) {
 		unsigned char objdata[55];
 		fread(objdata, sizeof(objdata), 1, file);
 
+		WorldObject *obj = NULL;
+
+		if (objdata[0] == 1 && objdata[1] == 1) {
+			Wildman *wildman = new Wildman();
+			wildman->ownership = OWNERSHIP_NEUTRAL;
+			obj = wildman;
+		}
+
+		if (objdata[0] == 7 && objdata[1] == 1) {
+			obj = new Shaman();
+		}
+
 		if (objdata[0] == 18 && objdata[1] == 2) {
 			VaultOfKnowledge *vok = new VaultOfKnowledge();
-			vok->ownership = objdata[2];
-			vok->x = objdata[4] * World::TileSize;
-			vok->z = (255 - objdata[6]) * World::TileSize;
 			vok->rotation = objdata[8] * 32;
-			this->objects.push_back(vok);
+			obj = vok;
+		}
+
+		if (obj != NULL) {
+			obj->ownership = objdata[2];
+			obj->x = objdata[4] * World::TileSize;
+			obj->z = (255 - objdata[6]) * World::TileSize;
+			this->objects.push_back(obj);
 		}
 	}
 	fclose(file);
 
 	for (int z = 0; z < 64; z++) {
 		for (int x = 0; x < 128; x++) {
-			int tmp = heightMap[x + (z * 128)];
-			heightMap[x + (z * 128)] = heightMap[x + ((127 - z) * 128)];
-			heightMap[x + ((127 - z) * 128)] = tmp;
+			int tmp = heightMap.Get(x, z);
+			heightMap.Set(x, z, heightMap.Get(x, 127 - z));
+			heightMap.Set(x, 127 - z, tmp);
 		}
 	}
 
 	this->size = 256;
+	this->sizeSquared = this->size * this->size;
+	this->sizeByNonTiles = this->size * World::TileSize;
+
 	this->tiles = new WorldTile[this->size * this->size];
 	for (int j = 0; j < this->size; j++) {
 		for (int i = 0; i < this->size; i++) {
@@ -275,8 +284,8 @@ void World::LoadLandFromPOPTB(const char *path)
 			int y0 = (y + 128) % 128;
 			int x1 = ((x + 1) + 128) % 128;
 			int y1 = ((y + 1) + 128) % 128;
-			double result = (heightMap[x0 + (y0 * 128)] * u_opposite + heightMap[x1 + (y0 * 128)] * u_ratio) * v_opposite + 
-							(heightMap[x0 + (y1 * 128)] * u_opposite + heightMap[x1 + (y1 * 128)] * u_ratio) * v_ratio;
+			double result = (heightMap.Get(x0, y0) * u_opposite + heightMap.Get(x1, y0) * u_ratio) * v_opposite + 
+							(heightMap.Get(x0, y1) * u_opposite + heightMap.Get(x1, y1) * u_ratio) * v_ratio;
 			
 			this->GetTile(i, j)->height = (int)result;
 
@@ -297,8 +306,6 @@ void World::LoadLandFromPOPTB(const char *path)
 			// }
 		}
 	}
-
-	delete[] heightMap;
 
 	// for (int z = 0; z < 256; z++) {
 	// 	for (int x = 0; x < 256; x++) {

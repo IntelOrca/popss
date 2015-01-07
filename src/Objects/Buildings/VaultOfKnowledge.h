@@ -10,7 +10,6 @@ public:
 	override ~VaultOfKnowledge();
 
 	override void Update();
-	override void Draw() const;
 };
 
 } }
