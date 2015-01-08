@@ -163,9 +163,30 @@ void draw()
 	SDL_GL_SwapWindow(glWindow);
 }
 
+#include "Mesh.h"
+
+using namespace IntelOrca::PopSS;
+
 int main(int argc, char** argv)
 {
 	long lastTicks = 0, ticks;
+
+	if (argc >= 4) {
+		if (_stricmp(argv[1], "convobj") == 0) {
+			Mesh *mesh = Mesh::FromObjFile(argv[2]);
+
+			if (argc >= 5)
+				mesh->name = strcpy(argv[4]);
+
+			if (mesh->SaveToObjectFile(argv[3]))
+				printf("Object converted successfully.\n");
+			else
+				fprintf(stderr, "Unable to convert object.");
+
+			delete mesh;
+			return 0;
+		}
+	}
 
 	srand(time(NULL));
 	if (!init_sdl())

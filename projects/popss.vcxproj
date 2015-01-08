@@ -28,6 +28,7 @@
     <ClCompile Include="..\src\ObjectRenderer.cpp" />
     <ClCompile Include="..\src\Objects\Buildings\Building.cpp" />
     <ClCompile Include="..\src\Objects\Buildings\VaultOfKnowledge.cpp" />
+    <ClCompile Include="..\src\Objects\Scenery\Tree.cpp" />
     <ClCompile Include="..\src\Objects\Units\Shaman.cpp" />
     <ClCompile Include="..\src\Objects\Units\Unit.cpp" />
     <ClCompile Include="..\src\Objects\Units\Wildman.cpp" />
@@ -50,6 +51,7 @@
     <ClInclude Include="..\src\ObjectRenderer.h" />
     <ClInclude Include="..\src\Objects\Buildings\Building.h" />
     <ClInclude Include="..\src\Objects\Buildings\VaultOfKnowledge.h" />
+    <ClInclude Include="..\src\Objects\Scenery\Tree.h" />
     <ClInclude Include="..\src\Objects\Units\Shaman.h" />
     <ClInclude Include="..\src\Objects\Units\Unit.h" />
     <ClInclude Include="..\src\Objects\Units\Wildman.h" />

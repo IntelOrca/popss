@@ -10,13 +10,56 @@ Mesh::Mesh()
 	this->textureCoordinates = NULL;
 	this->numFaces = 0;
 	this->faces = NULL;
+	this->name = NULL;
 }
 
 Mesh::~Mesh()
 {
-	if (this->vertices != NULL) delete[] this->vertices;
-	if (this->textureCoordinates != NULL) delete[] this->textureCoordinates;
-	if (this->faces != NULL) delete[] this->faces;
+	SafeDeleteArray(this->vertices);
+	SafeDeleteArray(this->textureCoordinates);
+	SafeDeleteArray(this->faces);
+	SafeDelete(this->name);
+}
+
+bool Mesh::SaveToObjectFile(const char *path)
+{
+	FILE *file;
+	unsigned char buffer[256];
+
+	file = fopen(path, "wb");
+	if (file == NULL)
+		return false;
+
+	buffer[0] = 'P';
+	buffer[1] = 'O';
+	buffer[2] = 'B';
+	buffer[3] = 'J';
+	buffer[4] = 0;
+	fwrite(buffer, 5, 1, file);
+
+	if (this->name == NULL) {
+		fputc(0, file);
+	} else {
+		fwrite(this->name, strlen(this->name) + 1, 1, file);
+	}
+
+	*((int*)buffer) = this->numVertices;
+	fwrite(buffer, 4, 1, file);
+	if (this->numVertices > 0)
+		fwrite(this->vertices, this->numVertices * sizeof(glm::vec3), 1, file);
+
+	*((int*)buffer) = this->numTextureCoordinates;
+	fwrite(buffer, 4, 1, file);
+	if (this->numTextureCoordinates > 0)
+		fwrite(this->textureCoordinates, this->numTextureCoordinates * sizeof(float), 1, file);
+
+	*((int*)buffer) = this->numFaces;
+	fwrite(buffer, 4, 1, file);
+	if (this->numFaces > 0)
+		fwrite(this->faces, this->numFaces * sizeof(Mesh::Face), 1, file);
+
+	fclose(file);
+	return true;
 }
 
 Mesh *Mesh::FromObjFile(const char *path)
@@ -100,36 +143,6 @@ Mesh *Mesh::FromObjFile(const char *path)
 	mesh->faces = new Face[mesh->numFaces];
 	for (int i = 0; i < mesh->numFaces; i++)
 		mesh->faces[i] = faces[i];
-
-	unsigned char buffer[256];
-	fopen("C:\\Users\\Ted\\Documents\\GitHub\\popss\\data\\objects\\vok.object", "wb");
-
-	buffer[0] = 'P';
-	buffer[1] = 'O';
-	buffer[2] = 'B';
-	buffer[3] = 'J';
-	buffer[4] = 0;
-	fwrite(buffer, 5, 1, file);
-
-	strcpy((char*)buffer, "vault of knowledge");
-	fwrite(buffer, strlen((char*)buffer) + 1, 1, file);
-
-	*((int*)buffer) = mesh->numVertices;
-	fwrite(buffer, 4, 1, file);
-	if (mesh->numVertices > 0)
-		fwrite(mesh->vertices, mesh->numVertices * sizeof(glm::vec3), 1, file);
-
-	*((int*)buffer) = mesh->numTextureCoordinates;
-	fwrite(buffer, 4, 1, file);
-	if (mesh->numTextureCoordinates > 0)
-		fwrite(mesh->textureCoordinates, mesh->numTextureCoordinates * sizeof(float), 1, file);
-
-	*((int*)buffer) = mesh->numFaces;
-	fwrite(buffer, 4, 1, file);
-	if (mesh->numFaces > 0)
-		fwrite(mesh->faces, mesh->numFaces * sizeof(Mesh::Face), 1, file);
-
-	fclose(file);
 
 	return mesh;
 }

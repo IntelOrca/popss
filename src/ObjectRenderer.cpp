@@ -7,6 +7,7 @@
 #include "World.h"
 #include "Objects/WorldObject.h"
 #include "Objects/Buildings/Building.h"
+#include "Objects/Scenery/Tree.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -51,6 +52,9 @@ void ObjectRenderer::Initialise()
 	this->objectVertexBuffer = new SimpleVertexBuffer<ObjectVertex>(this->objectShader, ObjectShaderVertexInfo);
 
 	this->unitMesh = Mesh::FromObjectFile("data/objects/unit.object");
+	this->treeMesh[0] = Mesh::FromObjectFile("data/objects/tree1.object");
+	this->treeMesh[1] = Mesh::FromObjectFile("data/objects/tree2.object");
+	this->treeMesh[2] = Mesh::FromObjectFile("data/objects/tree3.object");
 
 	this->vokMesh = Mesh::FromObjectFile("data/objects/vok.object");
 
@@ -86,40 +90,134 @@ void ObjectRenderer::Render(const Camera *camera)
 	glUniform1i(this->objectShaderUniforms.texture, 0);
 	SetLightSources(camera, this->objectShader);
 
-	// Render units
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, this->vokTexture);
-	PrepareMesh(this->unitMesh);
-	for (WorldObject *worldObject : this->world->objects) {
-		if (worldObject->group == OBJECT_GROUP_UNIT) {	
-			glm::mat4 mmatrix;
-			mmatrix = glm::translate(mmatrix, glm::vec3(worldObject->position));
-			mmatrix = glm::rotate(mmatrix, (worldObject->rotation / 128.0f) * (float)M_PI, glm::vec3(0, 1, 0));
-			mmatrix = glm::scale(mmatrix, glm::vec3(0.5 * World::TileSize));
-
-			glUniformMatrix4fv(this->objectShaderUniforms.modelMatrix, 1, GL_FALSE, glm::value_ptr(mmatrix));
-			RenderVertices();
-		}
-	}
-
-	// Render vault of knowledges
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, this->vokTexture);
-	PrepareMesh(this->vokMesh);
-	for (WorldObject *worldObject : this->world->objects) {
-		if (worldObject->type == BUILDING_VAULT_OF_KNOWLEDGE && worldObject->group == OBJECT_GROUP_BUILDING) {	
-			glm::mat4 mmatrix;
-			mmatrix = glm::translate(mmatrix, glm::vec3(worldObject->position));
-			mmatrix = glm::rotate(mmatrix, (worldObject->rotation / 128.0f) * (float)M_PI, glm::vec3(0, 1, 0));
-			mmatrix = glm::scale(mmatrix, glm::vec3(3 * World::TileSize));
-
-			glUniformMatrix4fv(this->objectShaderUniforms.modelMatrix, 1, GL_FALSE, glm::value_ptr(mmatrix));
-			RenderVertices();
-		}
-	}
+	UpdateVisibleObjects(camera);
+	RenderObjectGroups(camera);
 
 	if (this->debugRenderType != DEBUG_LANDSCAPE_RENDER_TYPE_NONE)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+}
+
+void ObjectRenderer::RenderObjectGroups(const Camera *camera)
+{
+	int numVisibleObjects = this->visibleObjects.size();
+	if (numVisibleObjects == 0)
+		return;
+
+	WorldObject **first = &this->visibleObjects[0];
+	int count = 1;
+
+	for (int i = 1; i < numVisibleObjects; i++) {
+		WorldObject **obj = &this->visibleObjects[i];
+		if ((*obj)->type == (*first)->type && (*obj)->group == (*first)->group) {
+			count++;
+		} else {
+			this->RenderObjectGroup(camera, first, count);
+			first = obj;
+			count = 1;
+		}
+	}
+
+	// Last group
+	this->RenderObjectGroup(camera, first, count);
+}
+
+void ObjectRenderer::RenderObjectGroup(const Camera *camera, WorldObject **objects, int count)
+{
+	const WorldObject *obj = objects[0];
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, this->vokTexture);
+
+	switch (obj->group) {
+	case OBJECT_GROUP_UNIT:
+		PrepareMesh(this->unitMesh);
+		break;
+	case OBJECT_GROUP_BUILDING:
+		if (obj->type == BUILDING_VAULT_OF_KNOWLEDGE)
+			PrepareMesh(this->vokMesh);
+		break;
+	case OBJECT_GROUP_SCENERY:
+		if (obj->type >= SCENERY_TREE0 && obj->type <= SCENERY_TREE2)
+			PrepareMesh(this->treeMesh[obj->type - SCENERY_TREE0]);
+		break;
+	}
+
+	for (int i = 0; i < count; i++, obj = objects[i]) {
+		glm::mat4 mmatrix;
+		mmatrix = glm::translate(mmatrix, GetObjectTranslationRelativeToCamera(camera, obj));
+		mmatrix = glm::rotate(mmatrix, (obj->rotation / 128.0f) * (float)M_PI, glm::vec3(0, 1, 0));
+
+		switch (obj->group) {
+		case OBJECT_GROUP_UNIT:
+			mmatrix = glm::scale(mmatrix, glm::vec3(0.5 * World::TileSize));
+			break;
+		case OBJECT_GROUP_BUILDING:
+			if (obj->type == BUILDING_VAULT_OF_KNOWLEDGE) {
+				mmatrix = glm::scale(mmatrix, glm::vec3(3 * World::TileSize));
+			}
+			break;
+		case OBJECT_GROUP_SCENERY:
+			if (obj->type >= SCENERY_TREE0 && obj->type <= SCENERY_TREE2) {
+				mmatrix = glm::scale(mmatrix, glm::vec3(3 * World::TileSize));
+			}
+			break;
+		}
+
+		glUniformMatrix4fv(this->objectShaderUniforms.modelMatrix, 1, GL_FALSE, glm::value_ptr(mmatrix));
+		RenderVertices();
+	}
+}
+
+void ObjectRenderer::UpdateVisibleObjects(const Camera *camera)
+{
+	this->visibleObjects.clear();
+	for (WorldObject *obj : this->world->objects)
+		if (this->IsObjectVisible(camera, obj))
+			this->visibleObjects.push_back(obj);
+
+	std::sort(this->visibleObjects.begin(), this->visibleObjects.end(), [](WorldObject *a, WorldObject *b) -> bool {
+		if (a->group != b->group) return a->group < b->group;
+		return a->type < b->type;
+	});
+}
+
+bool ObjectRenderer::IsObjectVisible(const Camera *camera, WorldObject *obj)
+{
+	glm::ivec3 cameraPosition = glm::ivec3(camera->target);
+
+	int distanceXa = abs(obj->x - cameraPosition.x);
+	int distanceXb = world->sizeByNonTiles - distanceXa;
+	int distanceZa = abs(obj->z - cameraPosition.z);
+	int distanceZb = world->sizeByNonTiles - distanceZa;
+	int distanceX = min(distanceXa, distanceXb);
+	int distanceZ = min(distanceZa, distanceZb);
+	int distance = sqrt(distanceX * distanceX + distanceZ * distanceZ);
+
+	return distance < 128 * World::TileSize;
+}
+
+glm::vec3 ObjectRenderer::GetObjectTranslationRelativeToCamera(const Camera *camera, const WorldObject *obj)
+{
+	glm::ivec3 cameraPosition = glm::ivec3(camera->target);
+
+	int translateX = 0;
+	int translateZ = 0;
+
+	int distanceXa = abs(obj->x - cameraPosition.x);
+	int distanceXb = world->sizeByNonTiles - distanceXa;
+	int distanceZa = abs(obj->z - cameraPosition.z);
+	int distanceZb = world->sizeByNonTiles - distanceZa;
+
+	if (distanceXb < distanceXa) {
+		if (obj->x > cameraPosition.x) translateX -= this->world->sizeByNonTiles;
+		else translateX += this->world->sizeByNonTiles;
+	}
+	if (distanceZb < distanceZa) {
+		if (obj->z > cameraPosition.z) translateZ -= this->world->sizeByNonTiles;
+		else translateZ += this->world->sizeByNonTiles;
+	}
+
+	return glm::vec3(obj->position + glm::ivec3(translateX, 0, translateZ));
 }
 
 void ObjectRenderer::PrepareMesh(const Mesh *mesh)

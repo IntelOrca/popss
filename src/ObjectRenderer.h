@@ -15,6 +15,7 @@ class Camera;
 class Mesh;
 class OrcaShader;
 class World;
+class WorldObject;
 class ObjectRenderer {
 public:
 	World *world;
@@ -27,7 +28,10 @@ public:
 	void Render(const Camera *camera);
 
 private:
+	std::vector<WorldObject*> visibleObjects;
+
 	Mesh *unitMesh;
+	Mesh *treeMesh[3];
 
 	Mesh *vokMesh;
 	GLuint vokTexture;
@@ -43,6 +47,14 @@ private:
 		GLint cameraTarget;
 		GLint texture;
 	} objectShaderUniforms;
+
+	void RenderObjectGroups(const Camera *camera);
+	void RenderObjectGroup(const Camera *camera, WorldObject **objects, int count);
+
+	void UpdateVisibleObjects(const Camera *camera);
+	bool IsObjectVisible(const Camera *camera, WorldObject *obj);
+
+	glm::vec3 GetObjectTranslationRelativeToCamera(const Camera *camera, const WorldObject *obj);
 
 	void PrepareMesh(const Mesh *mesh);
 	void RenderVertices();

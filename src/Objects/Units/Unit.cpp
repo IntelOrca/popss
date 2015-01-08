@@ -41,7 +41,7 @@ void Unit::Update()
 		this->subposition = this->position;
 	}
 
-	this->y = gWorld->GetHeight(this->x, this->z);
+	this->SetYToLandHeight();
 }
 
 void Unit::GiveMoveOrder(int x, int z)

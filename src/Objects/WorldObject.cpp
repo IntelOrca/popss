@@ -1,3 +1,4 @@
+#include "../World.h"
 #include "WorldObject.h"
 
 using namespace IntelOrca::PopSS;
@@ -14,3 +15,8 @@ WorldObject::WorldObject()
 WorldObject::~WorldObject() { }
 
 void WorldObject::Update() { }
+
+void WorldObject::SetYToLandHeight()
+{
+	this->y = gWorld->GetHeight(this->x, this->z);
+}

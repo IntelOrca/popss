@@ -46,6 +46,9 @@
     <ClCompile Include="..\src\Objects\Units\Wildman.cpp">
       <Filter>Objects\Units</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\Objects\Scenery\Tree.cpp">
+      <Filter>Objects\Scenery</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Audio.h" />
@@ -95,6 +98,9 @@
     <ClInclude Include="..\src\Util\Grid.hpp">
       <Filter>Util</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\Objects\Scenery\Tree.h">
+      <Filter>Objects\Scenery</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Util">
@@ -129,6 +135,9 @@
     </Filter>
     <Filter Include="Objects\Units">
       <UniqueIdentifier>{e3ae908a-e075-4f67-85bd-fb73782eed9d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\Scenery">
+      <UniqueIdentifier>{8e846bd9-b20f-43c7-8e1e-cd270d22ee43}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

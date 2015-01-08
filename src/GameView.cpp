@@ -200,9 +200,9 @@ void GameView::Update()
 
 void GameView::Draw()
 {
-	// this->skyRenderer.Render(&this->camera);
+	this->skyRenderer.Render(&this->camera);
 	this->landscapeRenderer.Render(&this->camera);
-	// this->objectRenderer.Render(&this->camera);
+	this->objectRenderer.Render(&this->camera);
 
 	this->camera.viewHasChanged = false;
 }

@@ -212,6 +212,7 @@ int World::CalculateTerrain(int landX, int landZ) const
 #include "Objects/Units/Wildman.h"
 #include "Objects/Units/Shaman.h"
 #include "Objects/Buildings/VaultOfKnowledge.h"
+#include "Objects/Scenery/Tree.h"
 
 void World::LoadLandFromPOPTB(const char *path)
 {
@@ -233,6 +234,19 @@ void World::LoadLandFromPOPTB(const char *path)
 			Wildman *wildman = new Wildman();
 			wildman->ownership = OWNERSHIP_NEUTRAL;
 			obj = wildman;
+		}
+
+		if (objdata[0] == 1 && objdata[1] == 1) {
+			Wildman *wildman = new Wildman();
+			wildman->ownership = OWNERSHIP_NEUTRAL;
+			obj = wildman;
+		}
+
+		if (objdata[0] >= 1 && objdata[0] <= 3 && objdata[1] == 5) {
+			Tree *tree = new Tree();
+			tree->type = objdata[0] - 1;
+			tree->ownership = OWNERSHIP_NEUTRAL;
+			obj = tree;
 		}
 
 		if (objdata[0] == 7 && objdata[1] == 1) {

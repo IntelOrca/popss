@@ -37,6 +37,8 @@ public:
 	virtual ~WorldObject();
 
 	virtual void Update();
+
+	void SetYToLandHeight();
 };
 
 } }

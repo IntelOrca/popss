@@ -113,3 +113,11 @@ extern cursor gCursorPress;
 extern cursor gCursorRelease;
 
 #define SafeDelete(x) if (x != NULL) { delete (x); x = NULL; }
+#define SafeDeleteArray(x) if (x != NULL) { delete[] (x); x = NULL; }
+
+static char *strcpy(const char *str) {
+	int length = strlen(str);
+	char *result = new char[length + 1];
+	memcpy(result, str, length + 1);
+	return result;
+}
