@@ -36,6 +36,8 @@ private:
 	Mesh *vokMesh;
 	GLuint vokTexture;
 
+	GLuint arrowTexture;
+
 	OrcaShader *objectShader = NULL;
 	SimpleVertexBuffer<ObjectVertex> *objectVertexBuffer;
 
@@ -58,6 +60,8 @@ private:
 
 	void PrepareMesh(const Mesh *mesh);
 	void RenderVertices();
+
+	void RenderUnitSelectionArrows(const Camera *camera);
 
 	static void ObjectRenderer::SetLightSources(const Camera *camera, OrcaShader *shader);
 };

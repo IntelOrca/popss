@@ -11,18 +11,15 @@ out vec4 OutputColour;
 void main()
 {
 	vec4 colour = texture(InputTexture, FragmentTextureCoords.xy);
-	if (colour.a == 0)
-		discard;
+	// if (colour.a == 0) discard;
 
 	// Apply fog
-	vec4 fogColour = vec4(0.8, 0.8, 0.8, 1.0);
-	colour = mix(colour, fogColour, FragmentFog);
+	vec3 fogcolour = vec3(0.5, 0.5, 0.7);
+	float fogalpha = min(0.5, FragmentFog * 0.5);
+	colour.rgb = colour.rgb * (1 - fogalpha) + fogcolour * fogalpha;
 
 	// Apply lighting
-	colour *= vec4(FragmentLighting, 1.0);
-
-	if (FragmentFog >= 0.75)
-		colour.a = mix(colour.a, 0.0, (FragmentFog - 0.75) / 0.25);
+	colour.rgb *= FragmentLighting;
 
 	// Output colour
 	OutputColour = colour;

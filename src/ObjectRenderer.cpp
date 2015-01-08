@@ -6,6 +6,7 @@
 #include "OrcaShader.h"
 #include "World.h"
 #include "Objects/WorldObject.h"
+#include "Objects/Units/Unit.h"
 #include "Objects/Buildings/Building.h"
 #include "Objects/Scenery/Tree.h"
 
@@ -60,6 +61,9 @@ void ObjectRenderer::Initialise()
 
 	glGenTextures(1, &this->vokTexture);
 	LoadTexture(this->vokTexture, "data/objects/vok.png");
+
+	glGenTextures(1, &this->arrowTexture);
+	LoadTexture(this->arrowTexture, "data/textures/arrow.png");
 }
 
 void ObjectRenderer::Render(const Camera *camera)
@@ -90,8 +94,13 @@ void ObjectRenderer::Render(const Camera *camera)
 	glUniform1i(this->objectShaderUniforms.texture, 0);
 	SetLightSources(camera, this->objectShader);
 
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_BLEND);
+	glEnable(GL_DEPTH_TEST);
+
 	UpdateVisibleObjects(camera);
 	RenderObjectGroups(camera);
+	RenderUnitSelectionArrows(camera);
 
 	if (this->debugRenderType != DEBUG_LANDSCAPE_RENDER_TYPE_NONE)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -153,12 +162,12 @@ void ObjectRenderer::RenderObjectGroup(const Camera *camera, WorldObject **objec
 			break;
 		case OBJECT_GROUP_BUILDING:
 			if (obj->type == BUILDING_VAULT_OF_KNOWLEDGE) {
-				mmatrix = glm::scale(mmatrix, glm::vec3(3 * World::TileSize));
+				mmatrix = glm::scale(mmatrix, glm::vec3(2 * World::TileSize));
 			}
 			break;
 		case OBJECT_GROUP_SCENERY:
 			if (obj->type >= SCENERY_TREE0 && obj->type <= SCENERY_TREE2) {
-				mmatrix = glm::scale(mmatrix, glm::vec3(3 * World::TileSize));
+				mmatrix = glm::scale(mmatrix, glm::vec3(2 * World::TileSize));
 			}
 			break;
 		}
@@ -274,4 +283,49 @@ void ObjectRenderer::SetLightSources(const Camera *camera, OrcaShader *shader)
 	glUniform3fv(glGetUniformLocation(shader->program, "InputLightSources[1].Ambient"), 1, glm::value_ptr(light->ambient));
 	glUniform3fv(glGetUniformLocation(shader->program, "InputLightSources[1].Diffuse"), 1, glm::value_ptr(light->diffuse));
 	glUniform3fv(glGetUniformLocation(shader->program, "InputLightSources[1].Specular"), 1, glm::value_ptr(light->specular));
+}
+
+void ObjectRenderer::RenderUnitSelectionArrows(const Camera *camera)
+{
+	ObjectVertex vertices[6] = {
+		{ { -0.5, +0.5, 0.0 }, { 0, 1, 0 }, { 0, 0 } },
+		{ { -0.5, -0.5, 0.0 }, { 0, 1, 0 }, { 0, 1 } },
+		{ { +0.5, +0.5, 0.0 }, { 0, 1, 0 }, { 1, 0 } },
+		{ { +0.5, +0.5, 0.0 }, { 0, 1, 0 }, { 1, 0 } },
+		{ { -0.5, -0.5, 0.0 }, { 0, 1, 0 }, { 0, 1 } },
+		{ { +0.5, -0.5, 0.0 }, { 0, 1, 0 }, { 1, 1 } }
+	};
+
+	glm::mat4 viewMatrix = camera->Get3dViewMatrix();
+	glm::vec3 left = { viewMatrix[0][0], viewMatrix[1][0], viewMatrix[2][0] };
+	glm::vec3 up = { viewMatrix[0][1], viewMatrix[1][1], viewMatrix[2][1] };
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, this->arrowTexture);
+	for (WorldObject *obj : this->visibleObjects) {
+		if (obj->group != OBJECT_GROUP_UNIT)
+			continue;
+
+		Unit *unit = static_cast<Unit*>(obj);
+		if (!unit->selected)
+			continue;
+
+		glm::mat4 mmatrix;
+		mmatrix = glm::translate(mmatrix, GetObjectTranslationRelativeToCamera(camera, obj) + glm::vec3(0, 256, 0));
+		mmatrix = glm::scale(mmatrix, glm::vec3(32));
+
+		vertices[0].position = -left + up;
+		vertices[1].position = -left - up;
+		vertices[2].position =  left + up;
+		vertices[5].position =  left - up;
+		vertices[3].position = vertices[2].position;
+		vertices[4].position = vertices[1].position;
+
+		this->objectVertexBuffer->Clear();
+		this->objectVertexBuffer->AddRange(vertices, countof(vertices));
+		this->objectVertexBuffer->Update();
+
+		glUniformMatrix4fv(this->objectShaderUniforms.modelMatrix, 1, GL_FALSE, glm::value_ptr(mmatrix));
+		RenderVertices();
+	}
 }

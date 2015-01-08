@@ -17,7 +17,7 @@ GameView::GameView()
 
 	gWorld = &this->world;
 
-	this->editLandMode = true;
+	this->editLandMode = false;
 	this->editLandX = -1;
 	this->editLandZ = -1;
 
@@ -200,6 +200,10 @@ void GameView::Update()
 
 void GameView::Draw()
 {
+	glClear(GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+
 	this->skyRenderer.Render(&this->camera);
 	this->landscapeRenderer.Render(&this->camera);
 	this->objectRenderer.Render(&this->camera);

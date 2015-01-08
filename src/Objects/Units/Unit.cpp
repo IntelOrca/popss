@@ -9,6 +9,7 @@ Unit::Unit() : WorldObject()
 {
 	this->group = OBJECT_GROUP_UNIT;
 	this->movingToDestination = false;
+	this->selected = false;
 }
 
 Unit::~Unit() { }

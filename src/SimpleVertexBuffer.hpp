@@ -42,6 +42,10 @@ public:
 		this->vertices.push_back(vertex);
 	}
 
+	void AddRange(const T *vertex, int count) {
+		this->vertices.insert(this->vertices.begin(), vertex, vertex + count);
+	}
+
 	int Count() { return this->vertices.size(); }
 
 	void Update() {
