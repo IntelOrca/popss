@@ -51,7 +51,7 @@ bool Mesh::SaveToObjectFile(const char *path)
 	*((int*)buffer) = this->numTextureCoordinates;
 	fwrite(buffer, 4, 1, file);
 	if (this->numTextureCoordinates > 0)
-		fwrite(this->textureCoordinates, this->numTextureCoordinates * sizeof(float), 1, file);
+		fwrite(this->textureCoordinates, this->numTextureCoordinates * sizeof(glm::vec2), 1, file);
 
 	*((int*)buffer) = this->numFaces;
 	fwrite(buffer, 4, 1, file);
@@ -89,12 +89,16 @@ Mesh *Mesh::FromObjFile(const char *path)
 	}
 	fclose(file);
 
-	std::vector<int> parsedInts;
+	std::vector<int> parsedIntsV;
+	std::vector<int> parsedIntsT;
+
 	std::vector<float> parsedFloats;
 	std::vector<glm::vec3> vertices;
 	std::vector<Face> faces;
+	std::vector<glm::vec2> texCoords;
 	for (char *line : lines) {
-		parsedInts.clear();
+		parsedIntsV.clear();
+		parsedIntsT.clear();
 		parsedFloats.clear();
 
 		int type;
@@ -104,15 +108,28 @@ Mesh *Mesh::FromObjFile(const char *path)
 			if (argIndex == 0) {
 				if (strcmp(pch, "v") == 0) type = 'v';
 				else if (strcmp(pch, "f") == 0) type = 'f';
+				else if (strcmp(pch, "vt") == 0) type = 't';
 				else {
 					type = -1;
 					break;
 				}
 			} else {
-				if (type == 'v') {
+				if (type == 'v' || type == 't') {
 					parsedFloats.push_back(atof(pch));
 				} else if (type == 'f') {
-					parsedInts.push_back(atoi(pch) - 1);
+					char *sep = strchr(pch, '/');
+					if (sep == NULL) {
+						parsedIntsT.push_back(atoi(pch) - 1);
+						parsedIntsV.push_back(-1);
+					} else {
+						char a[8];
+						memcpy(a, pch, (int)(sep - pch));
+						a[sep - pch] = 0;
+						parsedIntsT.push_back(atoi(a) - 1);
+
+						strcpy(a, sep + 1);
+						parsedIntsV.push_back(atoi(a) - 1);
+					}
 				}
 			}
 
@@ -123,9 +140,11 @@ Mesh *Mesh::FromObjFile(const char *path)
 		if (type == 'v') {
 			vertices.push_back(glm::vec3(parsedFloats[0], parsedFloats[1], parsedFloats[2]));
 		} else if (type == 'f') {
-			faces.push_back({ { { parsedInts[0], -1 }, { parsedInts[1], -1 }, { parsedInts[2], -1 } } });
-			if (parsedInts.size() >= 4)
-				faces.push_back({ { { parsedInts[0], -1 }, { parsedInts[2], -1 }, { parsedInts[3], -1 } } });
+			faces.push_back({ { { parsedIntsT[0], parsedIntsV[0] }, { parsedIntsT[1], parsedIntsV[1] }, { parsedIntsT[2], parsedIntsV[2] } } });
+			if (parsedIntsT.size() >= 4)
+				faces.push_back({ { { parsedIntsT[0], parsedIntsV[0] }, { parsedIntsT[2], parsedIntsV[2] }, { parsedIntsT[3], parsedIntsV[3] } } });
+		} else if (type == 't') {
+			texCoords.push_back({ parsedFloats[0], parsedFloats[1] });
 		}
 	}
 
@@ -138,6 +157,11 @@ Mesh *Mesh::FromObjFile(const char *path)
 	mesh->vertices = new glm::vec3[mesh->numVertices];
 	for (int i = 0; i < mesh->numVertices; i++)
 		mesh->vertices[i] = vertices[i];
+
+	mesh->numTextureCoordinates = texCoords.size();
+	mesh->textureCoordinates = new glm::vec2[mesh->numTextureCoordinates];
+	for (int i = 0; i < mesh->numTextureCoordinates; i++)
+		mesh->textureCoordinates[i] = texCoords[i];
 
 	mesh->numFaces = faces.size();
 	mesh->faces = new Face[mesh->numFaces];

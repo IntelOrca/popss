@@ -49,6 +49,10 @@
     <ClCompile Include="..\src\Objects\Scenery\Tree.cpp">
       <Filter>Objects\Scenery</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\Objects\Buildings\GuardTower.cpp">
+      <Filter>Objects\Buildings</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\LightManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Audio.h" />
@@ -101,6 +105,10 @@
     <ClInclude Include="..\src\Objects\Scenery\Tree.h">
       <Filter>Objects\Scenery</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\Objects\Buildings\GuardTower.h">
+      <Filter>Objects\Buildings</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\LightManager.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Util">

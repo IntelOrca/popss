@@ -1,7 +1,12 @@
 #include "Camera.h"
 #include "SkyRenderer.h"
+#include "World.h"
 
 using namespace IntelOrca::PopSS;
+
+const char *SkyShaderUniformNames[] = {
+	"uSkyColour"
+};
 
 const VertexAttribPointerInfo SkyShaderVertexInfo[] = {
 	{ "VertexPosition",			GL_FLOAT,			4,	offsetof(SkyVertex, position)		},
@@ -16,14 +21,17 @@ SkyRenderer::SkyRenderer()
 
 SkyRenderer::~SkyRenderer()
 {
-	if (this->skyShader != NULL) delete this->skyShader;
-	if (this->skyVertexBuffer != NULL) delete this->skyVertexBuffer;
+	SafeDelete(this->skyShader);
+	SafeDelete(this->skyVertexBuffer);
 }
 
 void SkyRenderer::Initialise()
 {
 	this->skyShader = OrcaShader::FromPath("fog.vert", "fog.frag");
 	this->skyVertexBuffer = new SimpleVertexBuffer<SkyVertex>(this->skyShader, SkyShaderVertexInfo);
+
+	for (int i = 0; i < UNIFORM_SKY_COUNT; i++)
+		this->skyShaderUniform[i] = this->skyShader->GetUniformLocation(SkyShaderUniformNames[i]);
 
 	// Set vertices
 	SimpleVertexBuffer<SkyVertex> *vb = this->skyVertexBuffer;
@@ -49,5 +57,8 @@ void SkyRenderer::Render(const Camera *camera)
 	glDisable(GL_DEPTH_TEST);
 
 	this->skyShader->Use();
+	
+	glUniform3fv(this->skyShaderUniform[UNIFORM_SKY_COLOUR], 1, glm::value_ptr(this->world->skyColour));
+	
 	this->skyVertexBuffer->Draw(GL_TRIANGLES);
 }

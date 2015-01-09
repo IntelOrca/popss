@@ -151,32 +151,6 @@ void LandscapeRenderer::Render(const Camera *camera)
 	this->lastDebugRenderType = this->debugRenderType;
 }
 
-void LandscapeRenderer::SetLightSources(const Camera *camera, OrcaShader *shader)
-{
-	LightSource alight, *light = &alight;
-
-	light->position = glm::vec3(0.0f, 2048.0f, 0.0f) + glm::vec3(camera->target.x, 0, camera->target.z);
-	light->ambient = glm::vec4(0.05f);
-	light->diffuse = glm::vec4(0.4f);
-	light->specular = glm::vec4(0.0f);
-
-	glUniform1i(glGetUniformLocation(shader->program, "InputLightSourcesCount"), 2);
-	glUniform3fv(glGetUniformLocation(shader->program, "InputLightSources[0].Position"), 1, glm::value_ptr(light->position));
-	glUniform3fv(glGetUniformLocation(shader->program, "InputLightSources[0].Ambient"), 1, glm::value_ptr(light->ambient));
-	glUniform3fv(glGetUniformLocation(shader->program, "InputLightSources[0].Diffuse"), 1, glm::value_ptr(light->diffuse));
-	glUniform3fv(glGetUniformLocation(shader->program, "InputLightSources[0].Specular"), 1, glm::value_ptr(light->specular));
-
-	light->position = glm::vec3(-1.0f, 0.1f, 1.0f) * World::SkyDomeRadius + glm::vec3(camera->target.x, 0, camera->target.z);
-	light->ambient = glm::vec4(0.0f);
-	light->diffuse = glm::vec4(0.5f, 0.5f, 0.0f, 0.0f);
-	light->specular = glm::vec4(0.25f, 0.25f, 0.0f, 0.0f);
-
-	glUniform3fv(glGetUniformLocation(shader->program, "InputLightSources[1].Position"), 1, glm::value_ptr(light->position));
-	glUniform3fv(glGetUniformLocation(shader->program, "InputLightSources[1].Ambient"), 1, glm::value_ptr(light->ambient));
-	glUniform3fv(glGetUniformLocation(shader->program, "InputLightSources[1].Diffuse"), 1, glm::value_ptr(light->diffuse));
-	glUniform3fv(glGetUniformLocation(shader->program, "InputLightSources[1].Specular"), 1, glm::value_ptr(light->specular));
-}
-
 void LandscapeRenderer::GenerateShadowTexture()
 {
 	const World *world = this->world;
@@ -566,7 +540,7 @@ void LandscapeRenderer::RenderLand(const Camera *camera)
 		glUniform1i(this->landShaderUniform.highlightActive, 0);
 	}
 
-	SetLightSources(camera, this->landShader);
+	this->world->lightManager.SetLightSources(camera, this->landShader);
 
 	char name[32];
 	for (int i = 0; i < 8; i++) {
@@ -832,7 +806,7 @@ void LandscapeRenderer::RenderWater(const Camera *camera)
 	glUniform1f(this->waterShaderUniform.sphereRatio, SphereRatio);
 	glUniform3f(this->waterShaderUniform.cameraTarget, camera->target.x, camera->target.y, camera->target.z);
 
-	this->SetLightSources(camera, this->waterShader);
+	this->world->lightManager.SetLightSources(camera, this->waterShader);
 	
 	glUniform3fv(waterShader->GetUniformLocation("InputCameraPosition"), 1, glm::value_ptr(camera->eye));
 	glUniform1f(waterShader->GetUniformLocation("iGlobalTime"), this->time);

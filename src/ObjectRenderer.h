@@ -28,15 +28,19 @@ public:
 	void Render(const Camera *camera);
 
 private:
+	unsigned char lastDebugRenderType;
+
 	std::vector<WorldObject*> visibleObjects;
 
 	Mesh *unitMesh;
 	Mesh *treeMesh[3];
 
+	Mesh *redGuardTowerMesh[2];
 	Mesh *vokMesh;
-	GLuint vokTexture;
 
 	GLuint arrowTexture;
+	GLuint frameTexture;
+	GLuint vokTexture;
 
 	OrcaShader *objectShader = NULL;
 	SimpleVertexBuffer<ObjectVertex> *objectVertexBuffer;
@@ -50,6 +54,8 @@ private:
 		GLint texture;
 	} objectShaderUniforms;
 
+	void InitialiseShader();
+
 	void RenderObjectGroups(const Camera *camera);
 	void RenderObjectGroup(const Camera *camera, WorldObject **objects, int count);
 
@@ -62,8 +68,6 @@ private:
 	void RenderVertices();
 
 	void RenderUnitSelectionArrows(const Camera *camera);
-
-	static void ObjectRenderer::SetLightSources(const Camera *camera, OrcaShader *shader);
 };
 
 } }

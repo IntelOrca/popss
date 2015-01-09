@@ -5,6 +5,11 @@
 
 namespace IntelOrca { namespace PopSS {
 
+enum {
+	UNIFORM_SKY_COLOUR,
+	UNIFORM_SKY_COUNT
+};
+
 struct SkyVertex {
 	glm::vec4 position;
 };
@@ -25,6 +30,8 @@ public:
 private:
 	OrcaShader *skyShader;
 	SimpleVertexBuffer<SkyVertex> *skyVertexBuffer;
+
+	GLuint skyShaderUniform[UNIFORM_SKY_COUNT];
 };
 
 } }

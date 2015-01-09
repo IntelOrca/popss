@@ -1,5 +1,6 @@
 #pragma once
 
+#include "LightManager.h"
 #include "PopSS.h"
 #include "Util/MathExtensions.hpp"
 
@@ -34,6 +35,9 @@ public:
 	glm::ivec3 landHighlightSource;
 	glm::ivec3 landHighlightTarget;
 	std::list<Unit*> selectedUnits;
+
+	LightManager lightManager;
+	glm::vec3 skyColour;
 
 	World();
 	~World();

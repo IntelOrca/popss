@@ -42,6 +42,59 @@ World::World()
 
 	// Snow
 	this->terrainStyles[5].textureIndex = 2;
+
+	// Morning
+	this->lightManager.natural = {
+		glm::vec3(0.0f, 2048.0f, 0.0f),
+		glm::vec3(0.2f),
+		glm::vec3(0.6f),
+		glm::vec3(0.0f),
+		0
+	};
+	this->lightManager.sun = {
+		glm::vec3(-1.0f, 0.1f, 1.0f),
+		glm::vec3(0.0f),
+		glm::vec3(0.8f),
+		glm::vec3(0.25f),
+		0
+	};
+	this->skyColour = glm::vec3(0.5, 0.5, 1.0f);
+
+	return;
+
+	// Sunset
+	this->lightManager.natural = {
+		glm::vec3(0.0f, 2048.0f, 0.0f),
+		glm::vec3(0.05f),
+		glm::vec3(0.4f),
+		glm::vec3(0.0f),
+		0
+	};
+	this->lightManager.sun = {
+		glm::vec3(-1.0f, 0.1f, 1.0f),
+		glm::vec3(0.0f),
+		glm::vec3(0.5f, 0.5f, 0.0f),
+		glm::vec3(0.25f, 0.25f, 0.0f),
+		0
+	};
+	this->skyColour = glm::vec3(0.5f, 0.5f, 1.0f);
+
+	// Dark
+	this->lightManager.natural = {
+		glm::vec3(0.0f, 2048.0f, 0.0f),
+		glm::vec3(0.05f),
+		glm::vec3(0.25f),
+		glm::vec3(0.0f),
+		0
+	};
+	this->lightManager.sun = {
+		glm::vec3(-1.0f, 0.25f, 1.0f),
+		glm::vec3(0.0f),
+		glm::vec3(0.25f),
+		glm::vec3(0.25f),
+		0
+	};
+	this->skyColour = glm::vec3(0.1f, 0.1f, 0.4f);
 }
 
 World::~World()

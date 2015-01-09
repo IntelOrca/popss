@@ -1,4 +1,5 @@
 #include "GameView.h"
+#include "Objects/Buildings/GuardTower.h"
 #include "Objects/Units/Unit.h"
 #include "Objects/WorldObject.h"
 
@@ -8,6 +9,8 @@ GameView *IntelOrca::PopSS::gGameView;
 
 GameView::GameView()
 {
+	gWorld = &this->world;
+
 	this->camera.world = &this->world;
 	this->skyRenderer.world = &this->world;
 	this->landscapeRenderer.world = &this->world;
@@ -15,7 +18,13 @@ GameView::GameView()
 
 	this->world.LoadLandFromPOPTB("data/maps/levl2011.dat");
 
-	gWorld = &this->world;
+	GuardTower *tower = new GuardTower();
+	tower->ownership = 0;
+	tower->x = 25 * World::TileSize;
+	tower->z = 188 * World::TileSize;
+	tower->SetYToLandHeight();
+	this->world.objects.push_back(tower);
+
 
 	this->editLandMode = false;
 	this->editLandX = -1;

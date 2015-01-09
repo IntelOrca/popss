@@ -36,6 +36,7 @@ struct LandWaterShaderUniform {
 };
 
 class Camera;
+class LightSource;
 class OrcaShader;
 class World;
 class WorldTile;
@@ -63,7 +64,6 @@ private:
 
 	GLuint shadowTexture;
 
-	void SetLightSources(const Camera *camera, OrcaShader *shader);
 	void GenerateShadowTexture();
 
 	bool *dirtyLandBlocks;

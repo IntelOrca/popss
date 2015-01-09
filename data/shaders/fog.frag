@@ -1,8 +1,10 @@
 #version 330
 
+uniform vec3 uSkyColour;
+
 out vec4 OutputColour;
 
 void main()
 {
-	OutputColour = vec4(0.75, 0.5, 0.2, 1.0);
+	OutputColour = vec4(vec3(uSkyColour), 1.0);
 }
