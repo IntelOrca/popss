@@ -1,6 +1,9 @@
 #include "Audio.h"
 #include "PopSS.h"
 #include "GameView.h"
+#include "LoadingScreen.h"
+
+using namespace IntelOrca::PopSS;
 
 SDL_Window *glWindow;
 SDL_GLContext gglContext;
@@ -17,7 +20,8 @@ static bool _updateStepMode = false;
 static bool _updateStepModeCanStep = false;
 static int _updateStep = 1;
 
-static IntelOrca::PopSS::GameView *_gameView;
+static LoadingScreen *_loadingScreen;
+static GameView *_gameView;
 
 bool init_sdl()
 {
@@ -150,7 +154,8 @@ void handle_events()
 
 void update()
 {
-	_gameView->Update();
+	_loadingScreen->Update();
+	// _gameView->Update();
 }
 
 void draw()
@@ -158,14 +163,14 @@ void draw()
 	glClearColor(0, 0, 0, 0);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	_gameView->Draw();
+	_loadingScreen->Draw();
+	// _gameView->Draw();
 
 	SDL_GL_SwapWindow(glWindow);
 }
 
 #include "Mesh.h"
 
-using namespace IntelOrca::PopSS;
 
 int main(int argc, char** argv)
 {
@@ -192,8 +197,10 @@ int main(int argc, char** argv)
 	if (!init_sdl())
 		return -1;
 
-	_gameView = new IntelOrca::PopSS::GameView();
-	IntelOrca::PopSS::gGameView = _gameView;
+	_loadingScreen = new LoadingScreen();
+
+	// _gameView = new IntelOrca::PopSS::GameView();
+	// IntelOrca::PopSS::gGameView = _gameView;
 
 	while (!_quit) {
 		handle_events();

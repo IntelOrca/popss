@@ -12,6 +12,7 @@ public:
 	struct FaceVertex {
 		int position;
 		int texture;
+		int normal;
 	};
 	struct Face {
 		FaceVertex vertex[3];
@@ -23,6 +24,8 @@ public:
 	glm::vec3 *vertices;
 	int numTextureCoordinates;
 	glm::vec2 *textureCoordinates;
+	int numNormals;
+	glm::vec3 *normals;
 	int numFaces;
 	Face *faces;
 

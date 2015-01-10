@@ -25,6 +25,7 @@
     <ClCompile Include="..\src\GameView.cpp" />
     <ClCompile Include="..\src\LandscapeRenderer.cpp" />
     <ClCompile Include="..\src\LightManager.cpp" />
+    <ClCompile Include="..\src\LoadingScreen.cpp" />
     <ClCompile Include="..\src\Mesh.cpp" />
     <ClCompile Include="..\src\ObjectRenderer.cpp" />
     <ClCompile Include="..\src\Objects\Buildings\Building.cpp" />
@@ -50,6 +51,7 @@
     <ClInclude Include="..\src\LandscapeRenderer.h" />
     <ClInclude Include="..\src\LightManager.h" />
     <ClInclude Include="..\src\LightSource.h" />
+    <ClInclude Include="..\src\LoadingScreen.h" />
     <ClInclude Include="..\src\Mesh.h" />
     <ClInclude Include="..\src\ObjectRenderer.h" />
     <ClInclude Include="..\src\Objects\Buildings\Building.h" />
@@ -85,6 +87,7 @@
     <None Include="..\data\shaders\flat_object.vert" />
     <None Include="..\data\shaders\fog.frag" />
     <None Include="..\data\shaders\fog.vert" />
+    <None Include="..\data\shaders\hand.vert" />
     <None Include="..\data\shaders\land.frag" />
     <None Include="..\data\shaders\land.vert" />
     <None Include="..\data\shaders\landscape.glsl" />
@@ -94,7 +97,7 @@
     <None Include="..\data\shaders\object.vert" />
     <None Include="..\data\shaders\sky.frag" />
     <None Include="..\data\shaders\sky.vert" />
-    <None Include="..\data\shaders\solid.frag" />
+    <None Include="..\data\shaders\hand.frag" />
     <None Include="..\data\shaders\water.frag" />
     <None Include="..\data\shaders\water.vert" />
   </ItemGroup>

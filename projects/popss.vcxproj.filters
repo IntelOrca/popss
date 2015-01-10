@@ -53,6 +53,7 @@
       <Filter>Objects\Buildings</Filter>
     </ClCompile>
     <ClCompile Include="..\src\LightManager.cpp" />
+    <ClCompile Include="..\src\LoadingScreen.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Audio.h" />
@@ -109,6 +110,7 @@
       <Filter>Objects\Buildings</Filter>
     </ClInclude>
     <ClInclude Include="..\src\LightManager.h" />
+    <ClInclude Include="..\src\LoadingScreen.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Util">
@@ -208,10 +210,13 @@
     <None Include="..\data\shaders\fog.frag">
       <Filter>data\shaders</Filter>
     </None>
-    <None Include="..\data\shaders\solid.frag">
+    <None Include="..\data\shaders\land_wireframe.frag">
       <Filter>data\shaders</Filter>
     </None>
-    <None Include="..\data\shaders\land_wireframe.frag">
+    <None Include="..\data\shaders\hand.vert">
+      <Filter>data\shaders</Filter>
+    </None>
+    <None Include="..\data\shaders\hand.frag">
       <Filter>data\shaders</Filter>
     </None>
   </ItemGroup>

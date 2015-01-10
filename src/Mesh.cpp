@@ -8,6 +8,8 @@ Mesh::Mesh()
 	this->vertices = NULL;
 	this->numTextureCoordinates = 0;
 	this->textureCoordinates = NULL;
+	this->numNormals = 0;
+	this->normals = NULL;
 	this->numFaces = 0;
 	this->faces = NULL;
 	this->name = NULL;
@@ -17,6 +19,7 @@ Mesh::~Mesh()
 {
 	SafeDeleteArray(this->vertices);
 	SafeDeleteArray(this->textureCoordinates);
+	SafeDeleteArray(this->normals);
 	SafeDeleteArray(this->faces);
 	SafeDelete(this->name);
 }
@@ -52,6 +55,11 @@ bool Mesh::SaveToObjectFile(const char *path)
 	fwrite(buffer, 4, 1, file);
 	if (this->numTextureCoordinates > 0)
 		fwrite(this->textureCoordinates, this->numTextureCoordinates * sizeof(glm::vec2), 1, file);
+
+	*((int*)buffer) = this->numNormals;
+	fwrite(buffer, 4, 1, file);
+	if (this->numNormals > 0)
+		fwrite(this->normals, this->numNormals * sizeof(glm::vec3), 1, file);
 
 	*((int*)buffer) = this->numFaces;
 	fwrite(buffer, 4, 1, file);
@@ -89,16 +97,17 @@ Mesh *Mesh::FromObjFile(const char *path)
 	}
 	fclose(file);
 
-	std::vector<int> parsedIntsV;
-	std::vector<int> parsedIntsT;
+	std::vector<int> parsedIntsV, parsedIntsT, parsedIntsN;
 
 	std::vector<float> parsedFloats;
 	std::vector<glm::vec3> vertices;
-	std::vector<Face> faces;
 	std::vector<glm::vec2> texCoords;
+	std::vector<glm::vec3> normals;
+	std::vector<Face> faces;
 	for (char *line : lines) {
 		parsedIntsV.clear();
 		parsedIntsT.clear();
+		parsedIntsN.clear();
 		parsedFloats.clear();
 
 		int type;
@@ -109,26 +118,43 @@ Mesh *Mesh::FromObjFile(const char *path)
 				if (strcmp(pch, "v") == 0) type = 'v';
 				else if (strcmp(pch, "f") == 0) type = 'f';
 				else if (strcmp(pch, "vt") == 0) type = 't';
+				else if (strcmp(pch, "vn") == 0) type = 'n';
 				else {
 					type = -1;
 					break;
 				}
 			} else {
-				if (type == 'v' || type == 't') {
+				if (type == 'v' || type == 't' || type == 'n') {
 					parsedFloats.push_back(atof(pch));
 				} else if (type == 'f') {
 					char *sep = strchr(pch, '/');
 					if (sep == NULL) {
 						parsedIntsT.push_back(atoi(pch) - 1);
 						parsedIntsV.push_back(-1);
+						parsedIntsN.push_back(-1);
 					} else {
 						char a[8];
 						memcpy(a, pch, (int)(sep - pch));
 						a[sep - pch] = 0;
 						parsedIntsT.push_back(atoi(a) - 1);
 
-						strcpy(a, sep + 1);
-						parsedIntsV.push_back(atoi(a) - 1);
+						char *sep2 = strchr(sep + 1, '/');
+						if (sep2 == NULL) {
+							strcpy(a, sep + 1);
+							parsedIntsV.push_back(atoi(a) - 1);
+							parsedIntsN.push_back(-1);
+						} else {
+							if (sep2 != sep + 1) {
+								memcpy(a, sep + 1, (int)(sep2 - sep - 1));
+								a[sep2 - sep - 1] = 0;
+								parsedIntsV.push_back(atoi(a) - 1);	
+							} else {
+								parsedIntsV.push_back(-1);
+							}
+
+							strcpy(a, sep2 + 1);
+							parsedIntsN.push_back(atoi(a) - 1);
+						}
 					}
 				}
 			}
@@ -139,12 +165,14 @@ Mesh *Mesh::FromObjFile(const char *path)
 
 		if (type == 'v') {
 			vertices.push_back(glm::vec3(parsedFloats[0], parsedFloats[1], parsedFloats[2]));
-		} else if (type == 'f') {
-			faces.push_back({ { { parsedIntsT[0], parsedIntsV[0] }, { parsedIntsT[1], parsedIntsV[1] }, { parsedIntsT[2], parsedIntsV[2] } } });
-			if (parsedIntsT.size() >= 4)
-				faces.push_back({ { { parsedIntsT[0], parsedIntsV[0] }, { parsedIntsT[2], parsedIntsV[2] }, { parsedIntsT[3], parsedIntsV[3] } } });
 		} else if (type == 't') {
 			texCoords.push_back({ parsedFloats[0], parsedFloats[1] });
+		} else if (type == 'n') {
+			normals.push_back({ parsedFloats[0], parsedFloats[1], parsedFloats[2] });
+		} else if (type == 'f') {
+			faces.push_back({ { { parsedIntsT[0], parsedIntsV[0], parsedIntsN[0] }, { parsedIntsT[1], parsedIntsV[1], parsedIntsN[1] }, { parsedIntsT[2], parsedIntsV[2], parsedIntsN[2] } } });
+			if (parsedIntsT.size() >= 4)
+				faces.push_back({ { { parsedIntsT[0], parsedIntsV[0], parsedIntsN[0] }, { parsedIntsT[2], parsedIntsV[2], parsedIntsN[2] }, { parsedIntsT[3], parsedIntsV[3], parsedIntsN[3] } } });
 		}
 	}
 
@@ -162,6 +190,11 @@ Mesh *Mesh::FromObjFile(const char *path)
 	mesh->textureCoordinates = new glm::vec2[mesh->numTextureCoordinates];
 	for (int i = 0; i < mesh->numTextureCoordinates; i++)
 		mesh->textureCoordinates[i] = texCoords[i];
+
+	mesh->numNormals = normals.size();
+	mesh->normals = new glm::vec3[mesh->numNormals];
+	for (int i = 0; i < mesh->numNormals; i++)
+		mesh->normals[i] = normals[i];
 
 	mesh->numFaces = faces.size();
 	mesh->faces = new Face[mesh->numFaces];
@@ -208,6 +241,12 @@ Mesh *Mesh::FromObjectFile(const char *path)
 	if (mesh->numTextureCoordinates > 0) {
 		mesh->textureCoordinates = new glm::vec2[mesh->numTextureCoordinates];
 		fread(mesh->textureCoordinates, mesh->numTextureCoordinates * sizeof(glm::vec2), 1, file);
+	}
+
+	fread(&mesh->numNormals, sizeof(int), 1, file);
+	if (mesh->numNormals > 0) {
+		mesh->normals = new glm::vec3[mesh->numNormals];
+		fread(mesh->normals, mesh->numNormals * sizeof(glm::vec3), 1, file);
 	}
 
 	fread(&mesh->numFaces, sizeof(int), 1, file);
