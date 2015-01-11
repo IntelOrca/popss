@@ -1,7 +1,9 @@
 obj/
 build/
+export/
 lib/
 *.suo
+
 
 # Visual C++ cache files
 ipch/
@@ -22,3 +24,7 @@ macXcode/
 
 # NSight user settings
 *.nvuser
+
+# Blender backup files
+*.blend*
+!*.blend

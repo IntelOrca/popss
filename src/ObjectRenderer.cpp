@@ -55,19 +55,19 @@ void ObjectRenderer::Initialise()
 	this->InitialiseShader();
 
 	this->unitMesh = Mesh::FromObjectFile("data/objects/unit.object");
-	this->treeMesh[0] = Mesh::FromObjectFile("data/objects/tree1.object");
-	this->treeMesh[1] = Mesh::FromObjectFile("data/objects/tree2.object");
-	this->treeMesh[2] = Mesh::FromObjectFile("data/objects/tree3.object");
+	this->treeMesh[0] = Mesh::FromObjectFile("data/objects/tree0.object");
+	this->treeMesh[1] = Mesh::FromObjectFile("data/objects/tree1.object");
+	this->treeMesh[2] = Mesh::FromObjectFile("data/objects/tree2.object");
 
-	this->redGuardTowerMesh[0] = Mesh::FromObjectFile("data/objects/red_tower_0.object");
-	this->redGuardTowerMesh[1] = Mesh::FromObjectFile("data/objects/red_tower.object");
+	this->redGuardTowerMesh[0] = Mesh::FromObjectFile("data/objects/tower_red.0.object");
+	this->redGuardTowerMesh[1] = Mesh::FromObjectFile("data/objects/tower_red.object");
 	this->vokMesh = Mesh::FromObjectFile("data/objects/vok.object");
 
 	glGenTextures(1, &this->arrowTexture);
 	LoadTexture(this->arrowTexture, "data/textures/arrow.png");
 
 	glGenTextures(1, &this->frameTexture);
-	LoadTexture(this->frameTexture, "data/objects/frame.png");
+	LoadTexture(this->frameTexture, "data/objects/tower_red.0.png");
 
 	glGenTextures(1, &this->vokTexture);
 	LoadTexture(this->vokTexture, "data/objects/vok.png");
@@ -291,18 +291,22 @@ void ObjectRenderer::PrepareMesh(const Mesh *mesh)
 		const Mesh::Face *face = &mesh->faces[i];
 		glm::vec3 vertices[3];
 		glm::vec2 texcoords[3];
+		glm::vec3 normal[3];
 		
 		for (int j = 0; j < 3; j++) {
 			vertices[j] = mesh->vertices[face->vertex[j].position];
 			texcoords[j] = face->vertex[j].texture == -1 ? glm::vec2(0) : mesh->textureCoordinates[face->vertex[j].texture];
+			normal[j] = face->vertex[j].normal == -1 ? glm::vec3(0) : mesh->normals[face->vertex[j].normal];
 		}
 
-		glm::vec3 normal = glm::normalize(glm::cross(vertices[1] - vertices[0], vertices[2] - vertices[0]));
 		for (int j = 0; j < 3; j++) {
 			ObjectVertex vertex;
 			vertex.position = vertices[j];
-			vertex.normal = normal;
+			vertex.normal = normal[j];
 			vertex.texcoords = texcoords[j];
+
+			vertex.texcoords.t = 1 - vertex.texcoords.t;
+
 			this->objectVertexBuffer->Add(vertex);
 		}
 	}

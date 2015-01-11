@@ -21,7 +21,6 @@ static bool _updateStepModeCanStep = false;
 static int _updateStep = 1;
 
 static LoadingScreen *_loadingScreen;
-static GameView *_gameView;
 
 bool init_sdl()
 {
@@ -154,8 +153,8 @@ void handle_events()
 
 void update()
 {
-	_loadingScreen->Update();
-	// _gameView->Update();
+	// _loadingScreen->Update();
+	gGameView->Update();
 }
 
 void draw()
@@ -163,8 +162,8 @@ void draw()
 	glClearColor(0, 0, 0, 0);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	_loadingScreen->Draw();
-	// _gameView->Draw();
+	// _loadingScreen->Draw();
+	gGameView->Draw();
 
 	SDL_GL_SwapWindow(glWindow);
 }
@@ -197,10 +196,8 @@ int main(int argc, char** argv)
 	if (!init_sdl())
 		return -1;
 
-	_loadingScreen = new LoadingScreen();
-
-	// _gameView = new IntelOrca::PopSS::GameView();
-	// IntelOrca::PopSS::gGameView = _gameView;
+	// _loadingScreen = new LoadingScreen();
+	gGameView = new IntelOrca::PopSS::GameView();
 
 	while (!_quit) {
 		handle_events();

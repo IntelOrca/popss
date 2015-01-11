@@ -231,31 +231,37 @@ Mesh *Mesh::FromObjectFile(const char *path)
 
 	Mesh *mesh = new Mesh();
 
-	fread(&mesh->numVertices, sizeof(int), 1, file);
+	if (fread(&mesh->numVertices, sizeof(int), 1, file) != 1) goto fail;
 	if (mesh->numVertices > 0) {
 		mesh->vertices = new glm::vec3[mesh->numVertices];
-		fread(mesh->vertices, mesh->numVertices * sizeof(glm::vec3), 1, file);
+		if (fread(mesh->vertices, mesh->numVertices * sizeof(glm::vec3), 1, file) != 1) goto fail;
 	}
 
-	fread(&mesh->numTextureCoordinates, sizeof(int), 1, file);
+	if (fread(&mesh->numTextureCoordinates, sizeof(int), 1, file) != 1) goto fail;
 	if (mesh->numTextureCoordinates > 0) {
 		mesh->textureCoordinates = new glm::vec2[mesh->numTextureCoordinates];
-		fread(mesh->textureCoordinates, mesh->numTextureCoordinates * sizeof(glm::vec2), 1, file);
+		if (fread(mesh->textureCoordinates, mesh->numTextureCoordinates * sizeof(glm::vec2), 1, file) != 1) goto fail;
 	}
 
-	fread(&mesh->numNormals, sizeof(int), 1, file);
+	if (fread(&mesh->numNormals, sizeof(int), 1, file) != 1) goto fail;
 	if (mesh->numNormals > 0) {
 		mesh->normals = new glm::vec3[mesh->numNormals];
-		fread(mesh->normals, mesh->numNormals * sizeof(glm::vec3), 1, file);
+		if (fread(mesh->normals, mesh->numNormals * sizeof(glm::vec3), 1, file) != 1) goto fail;
 	}
 
-	fread(&mesh->numFaces, sizeof(int), 1, file);
+	if (fread(&mesh->numFaces, sizeof(int), 1, file) != 1) goto fail;
 	if (mesh->numFaces > 0) {
 		mesh->faces = new Mesh::Face[mesh->numFaces];
-		fread(mesh->faces, mesh->numFaces * sizeof(Mesh::Face), 1, file);
+		if (fread(mesh->faces, mesh->numFaces * sizeof(Mesh::Face), 1, file) != 1) goto fail;
 	}
 
 	fclose(file);
-
 	return mesh;
+
+fail:
+	fclose(file);
+	fprintf(stderr, "Error reading %s\n", path);
+	
+	delete mesh;
+	return NULL;
 }
