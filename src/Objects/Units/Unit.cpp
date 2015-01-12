@@ -10,6 +10,7 @@ Unit::Unit() : WorldObject()
 	this->group = OBJECT_GROUP_UNIT;
 	this->movingToDestination = false;
 	this->selected = false;
+	this->requiresPathFind = false;
 }
 
 Unit::~Unit() { }
@@ -49,4 +50,5 @@ void Unit::GiveMoveOrder(int x, int z)
 {
 	this->destination = glm::vec3(x, 0, z);
 	this->movingToDestination = true;
+	this->requiresPathFind = true;
 }

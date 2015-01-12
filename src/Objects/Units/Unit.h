@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../../Pathfinding.h"
 #include "../WorldObject.h"
 
 namespace IntelOrca { namespace PopSS {
@@ -21,6 +22,9 @@ public:
 	glm::ivec3 destination;
 	glm::vec3 subposition;
 	glm::vec3 velocity;
+
+	bool requiresPathFind;
+	Path pathToDestination;
 
 	Unit();
 	override ~Unit();

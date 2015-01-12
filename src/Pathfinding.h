@@ -4,11 +4,18 @@
 
 namespace IntelOrca { namespace PopSS {
 
+struct PathPosition {
+	int x, z;
+};
+
 class PathNode {
 public:
-	int x, z;
+	union {
+		PathPosition position;
+		int x, z;
+	};
 	int g, f;
-	PathNode *parent;
+	const PathNode *parent;
 
 	PathNode();
 	PathNode(int x, int z);
@@ -17,9 +24,9 @@ public:
 	public:
 		Comparator(const bool &rev = false) { this->reverse = rev; }
 
-		bool operator() (const PathNode &lhs, const PathNode &rhs) const {
-			if (this->reverse) return lhs.f > rhs.f;
-			else return lhs.f < rhs.f;
+		bool operator() (const PathNode *lhs, const PathNode *rhs) const {
+			if (this->reverse) return lhs->f > rhs->f;
+			else return lhs->f < rhs->f;
 		}
 
 	private:
@@ -27,10 +34,38 @@ public:
 	};
 };
 
+typedef std::priority_queue<PathNode*, std::vector<PathNode*>, PathNode::Comparator> PathNodePriorityQueue;
+
 class Path {
 public:
 	int length;
-	struct { int x, z; } *positions;
+	PathPosition *positions;
+
+	Path() { length = 0; positions = NULL; }
+};
+
+class PathFinder {
+public:
+	PathFinder();
+	~PathFinder();
+
+	Path GetPath(int startX, int startZ, int goalX, int goalZ);
+
+private:
+	uint8 *tileFlags;
+	PathNode **nodeMap;
+	PathNodePriorityQueue openset;
+	std::vector<PathNode> nodePool;
+
+	PathNode *GetNewNode();
+
+	bool IsPositionInOpenSet(int x, int z);
+	bool IsPositionInClosedSet(int x, int z);
+
+	int EstimateHeuristicCost(int startX, int startZ, int goalX, int goalZ);
+	int GetDistance(int x0, int z0, int x1, int z1);
+
+	Path GetPathToNode(const PathNode *node) const;
 };
 
 class Pathfinding {

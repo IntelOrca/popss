@@ -3,6 +3,11 @@
 
 using namespace IntelOrca::PopSS;
 
+enum {
+	TILE_FLAG_OPEN = (1 << 0),
+	TILE_FLAG_CLOSED = (1 << 1)
+};
+
 PathNode::PathNode() { }
 PathNode::PathNode(int x, int z)
 {
@@ -11,6 +16,138 @@ PathNode::PathNode(int x, int z)
 	this->g = 0;
 	this->f = 0;
 }
+
+
+PathFinder::PathFinder()
+{
+	this->tileFlags = new uint8[gWorld->sizeSquared];
+	this->nodeMap = new PathNode*[gWorld->sizeSquared];
+}
+
+PathFinder::~PathFinder()
+{
+	SafeDelete(this->tileFlags);
+	SafeDelete(this->nodeMap);
+}
+
+Path PathFinder::GetPath(int startX, int startZ, int goalX, int goalZ)
+{
+	// Initialise state
+	this->openset = PathNodePriorityQueue();
+	memset(this->tileFlags, 0, gWorld->sizeSquared * sizeof(uint8));
+	memset(this->nodeMap, 0, gWorld->sizeSquared * sizeof(PathNode*));
+	this->nodePool.clear();
+
+	// Add start node
+	PathNode *startNode = this->GetNewNode();
+	startNode->x = startX;
+	startNode->z = startZ;
+	startNode->g = 0;
+	startNode->f = startNode->g + this->EstimateHeuristicCost(startX, startZ, goalX, goalZ);
+	startNode->parent = NULL;
+	this->nodeMap[startX + startZ * gWorld->size] = startNode;
+	this->openset.push(startNode);
+
+	while (!openset.empty()) {
+		const PathNode *current = openset.top();
+
+		// Ignore out of date nodes
+		if (current->g == -1) {
+			openset.pop();
+			continue;
+		}
+
+		if (current->x == goalX && current->z == goalZ)
+			GetPathToNode(current);
+
+		openset.pop();
+		this->tileFlags[current->x + current->z * gWorld->size] &= ~TILE_FLAG_OPEN;
+		this->tileFlags[current->x + current->z * gWorld->size] |= TILE_FLAG_CLOSED;
+
+		for (int dz = -1; dz <= 1; dz++) {
+			for (int dx = -1; dx <= 1; dx++) {
+				int neighbourX = current->x + dx;
+				int neighbourZ = current->z + dz;
+
+				if (gWorld->GetTile(neighbourX, neighbourZ) == 0)
+					continue;
+
+				if (this->IsPositionInClosedSet(neighbourX, neighbourZ))
+					continue;
+
+				bool isopen = this->IsPositionInOpenSet(neighbourX, neighbourZ);
+				int tentativeG = current->g + this->GetDistance(current->x, current->z, neighbourX, neighbourZ);
+				PathNode *existing = this->nodeMap[neighbourX + neighbourZ * gWorld->size];
+
+				if (!isopen || tentativeG < existing->g) {
+					// Set existing node to be out of date
+					if (existing != NULL)
+						existing->g = -1;
+					
+					PathNode *node = this->GetNewNode();
+					node->x = neighbourX;
+					node->z = neighbourZ;
+					node->g = tentativeG;
+					node->f = tentativeG + this->EstimateHeuristicCost(neighbourX, neighbourZ, goalX, goalZ);
+					node->parent = current;
+					this->openset.push(node);
+				}
+			}
+		}
+	}
+
+	return Path();
+}
+
+PathNode *PathFinder::GetNewNode()
+{
+	this->nodePool.push_back(PathNode());
+	return &this->nodePool.back();
+}
+
+bool PathFinder::IsPositionInOpenSet(int x, int z)
+{
+	return this->tileFlags[x + z * gWorld->size] & TILE_FLAG_OPEN;
+}
+
+bool PathFinder::IsPositionInClosedSet(int x, int z)
+{
+	return this->tileFlags[x + z * gWorld->size] & TILE_FLAG_CLOSED;
+}
+
+int PathFinder::EstimateHeuristicCost(int startX, int startZ, int goalX, int goalZ)
+{
+	return abs(goalX - startX) + abs(goalZ - startZ);
+}
+
+int PathFinder::GetDistance(int x0, int z0, int x1, int z1)
+{
+	return 1;
+}
+
+Path PathFinder::GetPathToNode(const PathNode *node) const
+{
+	Path path;
+	std::vector<PathPosition> positions;
+	do {
+		positions.push_back(node->position);
+		node = node->parent;
+	} while (node != NULL);
+
+	// Add them to path in reverse
+	path.length = positions.size();
+	path.positions = new PathPosition[path.length];
+	for (int i = 0; i < path.length; i++)
+		path.positions[i] = positions[path.length - i - 1];
+
+	return path;
+}
+
+
+
+
+
+
 
 int Pathfinding::GetDistance(int x0, int z0, int x1, int z1)
 {
