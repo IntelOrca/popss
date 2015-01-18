@@ -107,6 +107,8 @@ void World::Update()
 {
 	for (WorldObject *obj : this->objects)
 		obj->Update();
+
+	PathFinder::RunPathfinderLoop();
 }
 
 void World::Reprocess()
@@ -128,6 +130,7 @@ void World::ProcessTile(int x, int z)
 	tile->lightNormal = CalculateNormal(x, z);
 	tile->terrain = CalculateTerrain(x, z);
 	tile->shore = IsShore(x, z);
+	tile->steepness = GetSteepness(x, z);
 }
 
 void World::GenerateDistanceFromWaterMap()
@@ -423,4 +426,68 @@ int World::GetHeight(int x, int z) const
 		int heightZ = ((height10 - height11) * (World::TileSize - modz)) / World::TileSize;
 		return height11 + heightX + heightZ;
 	}
+}
+
+glm::ivec2 World::GetClosestDelta(int x0, int z0, int x1, int z1)
+{
+	int deltaX, deltaZ;
+
+	int size = this->sizeByNonTiles;
+	int x1subx0 = x1 - x0;
+	int z1subz0 = z1 - z0;
+
+	int distanceXa = abs(x1subx0);
+	int distanceXb = size - distanceXa;
+	int distanceZa = abs(z1subz0);
+	int distanceZb = size - distanceZa;
+
+	if (distanceXa <= distanceXb) {
+		deltaX = x1subx0;
+	} else {
+		deltaX = x1 > x0 ?
+			x1subx0 - size :
+			x1subx0 + size;
+	}
+
+	if (distanceZa <= distanceZb) {
+		deltaZ = z1subz0;
+	} else {
+		deltaZ = z1 > z0 ?
+			z1subz0 - size :
+			z1subz0 + size;
+	}
+
+	return glm::ivec2(deltaX, deltaZ);
+}
+
+glm::ivec2 World::GetClosestTileDelta(int tileX0, int tileZ0, int tileX1, int tileZ1)
+{
+	int deltaX, deltaZ;
+
+	int size = this->size;
+	int x1subx0 = tileX1 - tileX0;
+	int z1subz0 = tileZ1 - tileZ0;
+
+	int distanceXa = abs(x1subx0);
+	int distanceXb = size - distanceXa;
+	int distanceZa = abs(z1subz0);
+	int distanceZb = size - distanceZa;
+
+	if (distanceXa <= distanceXb) {
+		deltaX = x1subx0;
+	} else {
+		deltaX = tileX1 > tileX0 ?
+			x1subx0 - size :
+			x1subx0 + size;
+	}
+
+	if (distanceZa <= distanceZb) {
+		deltaZ = z1subz0;
+	} else {
+		deltaZ = tileZ1 > tileZ0 ?
+			z1subz0 - size :
+			z1subz0 + size;
+	}
+
+	return glm::ivec2(deltaX, deltaZ);
 }

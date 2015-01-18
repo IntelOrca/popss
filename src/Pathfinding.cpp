@@ -1,5 +1,7 @@
 #include "Pathfinding.h"
 #include "World.h"
+#include "Objects/WorldObject.h"
+#include "Objects/Units/Unit.h"
 
 using namespace IntelOrca::PopSS;
 
@@ -37,6 +39,7 @@ Path PathFinder::GetPath(int startX, int startZ, int goalX, int goalZ)
 	memset(this->tileFlags, 0, gWorld->sizeSquared * sizeof(uint8));
 	memset(this->nodeMap, 0, gWorld->sizeSquared * sizeof(PathNode*));
 	this->nodePool.clear();
+	this->nodePool.reserve(100000);
 
 	// Add start node
 	PathNode *startNode = this->GetNewNode();
@@ -47,6 +50,7 @@ Path PathFinder::GetPath(int startX, int startZ, int goalX, int goalZ)
 	startNode->parent = NULL;
 	this->nodeMap[startX + startZ * gWorld->size] = startNode;
 	this->openset.push(startNode);
+	this->tileFlags[startX + startZ * gWorld->size] |= TILE_FLAG_OPEN;
 
 	while (!openset.empty()) {
 		const PathNode *current = openset.top();
@@ -58,25 +62,34 @@ Path PathFinder::GetPath(int startX, int startZ, int goalX, int goalZ)
 		}
 
 		if (current->x == goalX && current->z == goalZ)
-			GetPathToNode(current);
+			return GetPathToNode(current);
 
 		openset.pop();
 		this->tileFlags[current->x + current->z * gWorld->size] &= ~TILE_FLAG_OPEN;
 		this->tileFlags[current->x + current->z * gWorld->size] |= TILE_FLAG_CLOSED;
 
+		// Direction to goal
+		int dirX = glm::sign(goalX - current->x);
+		int dirZ = glm::sign(goalZ - current->z);
+
 		for (int dz = -1; dz <= 1; dz++) {
 			for (int dx = -1; dx <= 1; dx++) {
-				int neighbourX = current->x + dx;
-				int neighbourZ = current->z + dz;
-
-				if (gWorld->GetTile(neighbourX, neighbourZ) == 0)
-					continue;
+				int neighbourX = gWorld->TileWrap(current->x + dx);
+				int neighbourZ = gWorld->TileWrap(current->z + dz);
 
 				if (this->IsPositionInClosedSet(neighbourX, neighbourZ))
 					continue;
 
+				int dist = this->GetDistance(current->x, current->z, neighbourX, neighbourZ);
+				if (dist < 0)
+					continue;
+
+				// Penalise wrong direction to goal
+				if (dirX != dx) dist += 64;
+				if (dirZ != dz) dist += 64;
+
 				bool isopen = this->IsPositionInOpenSet(neighbourX, neighbourZ);
-				int tentativeG = current->g + this->GetDistance(current->x, current->z, neighbourX, neighbourZ);
+				int tentativeG = current->g + dist;
 				PathNode *existing = this->nodeMap[neighbourX + neighbourZ * gWorld->size];
 
 				if (!isopen || tentativeG < existing->g) {
@@ -91,6 +104,8 @@ Path PathFinder::GetPath(int startX, int startZ, int goalX, int goalZ)
 					node->f = tentativeG + this->EstimateHeuristicCost(neighbourX, neighbourZ, goalX, goalZ);
 					node->parent = current;
 					this->openset.push(node);
+					this->tileFlags[neighbourX + neighbourZ * gWorld->size] |= TILE_FLAG_OPEN;
+					this->nodeMap[neighbourX + neighbourZ * gWorld->size] = node;
 				}
 			}
 		}
@@ -117,12 +132,25 @@ bool PathFinder::IsPositionInClosedSet(int x, int z)
 
 int PathFinder::EstimateHeuristicCost(int startX, int startZ, int goalX, int goalZ)
 {
+	// TODO handle world wrap in most efficient way possible
 	return abs(goalX - startX) + abs(goalZ - startZ);
 }
 
 int PathFinder::GetDistance(int x0, int z0, int x1, int z1)
 {
-	return 1;
+	int height0 = gWorld->GetTile(x0, z0)->height;
+	if (height0 == 0) return -1;
+
+	int height1 = gWorld->GetTile(x1, z1)->height;
+	if (height1 == 0) return -1;
+
+	int steepness = abs(height1 - height0);
+	steepness = max(0, steepness - 64);
+
+	if (steepness > 48)
+		return -1;
+
+	return clamp(1, steepness * steepness, 10000);
 }
 
 Path PathFinder::GetPathToNode(const PathNode *node) const
@@ -144,6 +172,31 @@ Path PathFinder::GetPathToNode(const PathNode *node) const
 }
 
 
+static PathFinder *_pathFinderWorker = NULL;
+
+void PathFinder::RunPathfinderLoop()
+{
+	if (_pathFinderWorker == NULL)
+		_pathFinderWorker = new PathFinder();
+
+	World *world = gWorld;
+
+	for (WorldObject *obj : world->objects) {
+		if (obj->group != OBJECT_GROUP_UNIT)
+			continue;
+
+		Unit *unit = static_cast<Unit*>(obj);
+		if (unit->requiresPathFind) {
+			int startX = unit->x / World::TileSize;
+			int startZ = unit->z / World::TileSize;
+			int goalX = unit->destination.x / World::TileSize;
+			int goalZ = unit->destination.z / World::TileSize;
+
+			unit->pathToDestination = _pathFinderWorker->GetPath(startX, startZ, goalX, goalZ);
+			unit->requiresPathFind = false;
+		}
+	}
+}
 
 
 

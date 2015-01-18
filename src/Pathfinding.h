@@ -12,7 +12,7 @@ class PathNode {
 public:
 	union {
 		PathPosition position;
-		int x, z;
+		struct { int x, z; };
 	};
 	int g, f;
 	const PathNode *parent;
@@ -25,8 +25,8 @@ public:
 		Comparator(const bool &rev = false) { this->reverse = rev; }
 
 		bool operator() (const PathNode *lhs, const PathNode *rhs) const {
-			if (this->reverse) return lhs->f > rhs->f;
-			else return lhs->f < rhs->f;
+			if (this->reverse) return lhs->f < rhs->f;
+			else return lhs->f > rhs->f;
 		}
 
 	private:
@@ -50,6 +50,8 @@ public:
 	~PathFinder();
 
 	Path GetPath(int startX, int startZ, int goalX, int goalZ);
+
+	static void RunPathfinderLoop();
 
 private:
 	uint8 *tileFlags;

@@ -247,16 +247,8 @@ void ObjectRenderer::UpdateVisibleObjects(const Camera *camera)
 
 bool ObjectRenderer::IsObjectVisible(const Camera *camera, WorldObject *obj)
 {
-	glm::ivec3 cameraPosition = glm::ivec3(camera->target);
-
-	int distanceXa = abs(obj->x - cameraPosition.x);
-	int distanceXb = world->sizeByNonTiles - distanceXa;
-	int distanceZa = abs(obj->z - cameraPosition.z);
-	int distanceZb = world->sizeByNonTiles - distanceZa;
-	int distanceX = min(distanceXa, distanceXb);
-	int distanceZ = min(distanceZa, distanceZb);
-	int distance = sqrt(distanceX * distanceX + distanceZ * distanceZ);
-
+	glm::ivec2 delta = this->world->GetClosestDelta(obj->x, obj->z, camera->target.x, camera->target.z);
+	int distance = sqrt(delta.x * delta.x + delta.y * delta.y);
 	return distance < 128 * World::TileSize;
 }
 

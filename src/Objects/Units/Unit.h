@@ -25,12 +25,15 @@ public:
 
 	bool requiresPathFind;
 	Path pathToDestination;
+	int pathToDestinationCurrentIndex;
 
 	Unit();
 	override ~Unit();
 
 	override void Update();
 
+	void RunTo(int targetX, int targetZ);
+	void Stop();
 	void GiveMoveOrder(int x, int z);
 };
 

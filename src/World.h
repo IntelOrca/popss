@@ -12,6 +12,7 @@ class WorldObject;
 
 struct WorldTile {
 	unsigned int height;
+	unsigned int steepness;
 	unsigned char terrain;
 	glm::vec3 lightNormal;
 	bool shore;
@@ -61,6 +62,9 @@ public:
 
 	WorldTile *GetTile(int x, int z) const;
 	int GetHeight(int x, int z) const;
+
+	glm::ivec2 GetClosestDelta(int x0, int z0, int x1, int z1);
+	glm::ivec2 GetClosestTileDelta(int tileX0, int tileZ0, int tileX1, int tileZ1);
 
 	template<typename T>
 	T Wrap(T xz) const { return wraprange((T)0, xz, (T)(this->size * TileSize)); }
